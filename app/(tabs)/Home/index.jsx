@@ -11,17 +11,17 @@ function getDistance(lat1, lon1, lat2, lon2) {
   const R = 6371;
   const dLat = deg2rad(lat2 - lat1);
   const dLon = deg2rad(lon2 - lon1);
-  const a = 
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
-    Math.sin(dLon/2) * Math.sin(dLon/2); 
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   const d = R * c;
   return d;
 }
 
 function deg2rad(deg) {
-  return deg * (Math.PI/180);
+  return deg * (Math.PI / 180);
 }
 
 export default function App() {
@@ -125,7 +125,7 @@ export default function App() {
 
   const filteredParkingSpots = parkingSpots.filter(spot => {
     const isWithinRadius = spot.distance <= searchRadius;
-    const matchesSearch = searchQuery.length === 0 || 
+    const matchesSearch = searchQuery.length === 0 ||
       spot.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       spot.description.toLowerCase().includes(searchQuery.toLowerCase());
     return isWithinRadius && matchesSearch;
@@ -133,32 +133,23 @@ export default function App() {
 
   if (errorMsg) {
     return (
-      <View style={styles.container}>
+      <View className="flex bg-white">
         <Text style={styles.errorText}>{errorMsg}</Text>
       </View>
     );
   }
 
-  if (isLoading) {
-    return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color="#007AFF" />
-        <Text style={styles.loadingText}>Finding nearby parking spots...</Text>
-      </View>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <View className="flex bg-white items-center justify-center">
+  //       <ActivityIndicator size="large" color="#007AFF" />
+  //       <Text className='mt-6 text-2xl text-cyan-500'>Finding nearby parking spots...</Text>
+  //     </View>
+  //   );
+  // }
 
   return (
-    <View style={styles.container}>
-      <SearchBar
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        searchRadius={searchRadius}
-        onRadiusChange={setSearchRadius}
-        isCustomLocation={isCustomLocation}
-        onResetLocation={handleResetLocation}
-      />
-
+    <View className="flex-1 bg-white">
       <Map
         location={location}
         isCustomLocation={isCustomLocation}
@@ -167,26 +158,29 @@ export default function App() {
         onLocationChange={handleLocationChange}
         onParkingSelect={setSelectedParking}
       />
+      <View className='flex-1 bg-slate-500'>
+        <SearchBar
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          searchRadius={searchRadius}
+          onRadiusChange={setSearchRadius}
+          isCustomLocation={isCustomLocation}
+          onResetLocation={handleResetLocation}
+        />
 
-      <ParkingDetails
-        parking={selectedParking}
-        onBook={() => alert(`Booking parking at ${selectedParking?.title}`)}
-        onNavigate={() => openMapsNavigation(selectedParking)}
-      />
+
+        <ParkingDetails
+          parking={selectedParking}
+          onBook={() => alert(`Booking parking at ${selectedParking?.title}`)}
+          onNavigate={() => openMapsNavigation(selectedParking)}
+        />
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: '#666',
-  },
+
   errorText: {
     fontSize: 16,
     color: 'red',
