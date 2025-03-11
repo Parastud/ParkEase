@@ -6,6 +6,7 @@ import SearchBar from '../../../components/SearchBar';
 import ParkingDetails from '../../../components/ParkingDetails';
 import { FIXED_PARKING_SPOTS } from '../../../constants/parkingData';
 import "../../../global.css";
+import SwipeUpDown from 'react-native-swipe-up-down';
 
 function getDistance(lat1, lon1, lat2, lon2) {
   const R = 6371;
@@ -139,14 +140,14 @@ export default function App() {
     );
   }
 
-  // if (isLoading) {
-  //   return (
-  //     <View className="flex bg-white items-center justify-center">
-  //       <ActivityIndicator size="large" color="#007AFF" />
-  //       <Text className='mt-6 text-2xl text-cyan-500'>Finding nearby parking spots...</Text>
-  //     </View>
-  //   );
-  // }
+  if (isLoading) {
+    return (
+      <View className="flex bg-white items-center justify-center">
+        <ActivityIndicator size="large" color="#007AFF" />
+        <Text className='mt-6 text-2xl text-cyan-500'>Finding nearby parking spots...</Text>
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 bg-white">
