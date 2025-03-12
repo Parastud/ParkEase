@@ -6,7 +6,6 @@ import SearchBar from '../../../components/SearchBar';
 import ParkingDetails from '../../../components/ParkingDetails';
 import { FIXED_PARKING_SPOTS } from '../../../constants/parkingData';
 import "../../../global.css";
-import SwipeUpDown from 'react-native-swipe-up-down';
 
 function getDistance(lat1, lon1, lat2, lon2) {
   const R = 6371;
@@ -159,7 +158,7 @@ export default function App() {
         onLocationChange={handleLocationChange}
         onParkingSelect={setSelectedParking}
       />
-      <View className='flex-1 bg-slate-500'>
+      <View className='flex-1 bg-slate-500 b-0'>
         <SearchBar
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
