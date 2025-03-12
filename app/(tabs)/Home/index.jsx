@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useRef, useCallback, useMemo,useContext } from 'react';
 import { StyleSheet, View, ActivityIndicator, Text, Linking, Platform, TextInput, TouchableOpacity, FlatList, Pressable } from 'react-native';
 import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,6 +7,7 @@ import Map from '../../../components/Map';
 import ParkingDetails from '../../../components/ParkingDetails';
 import { FIXED_PARKING_SPOTS } from '../../../constants/parkingData';
 import "../../../global.css";
+import { GlobalState } from '../../../constants/usecontext';
 import { router } from 'expo-router';
 // Memoize distance calculation function
 const getDistance = (lat1, lon1, lat2, lon2) => {
@@ -22,11 +23,13 @@ const getDistance = (lat1, lon1, lat2, lon2) => {
   return d;
 }
 
+
 function deg2rad(deg) {
   return deg * (Math.PI / 180);
 }
 
 export default function Home() {
+  const {modalVisible, setModalVisible} = useContext(GlobalState)
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -61,7 +64,8 @@ export default function Home() {
   }, []);
 
   const handlebooking = () => {
-        router.navigate(`/(tabs)/Booking/${selectedParking.id}`);
+        setModalVisible(true)
+        router.push(`/(tabs)/Home/Booking/${selectedParking.id}`);
         
   }
 
