@@ -43,5 +43,14 @@ export const FIXED_PARKING_SPOTS = [
     description: "Garden area parking",
     price: "Rs 20/hour",
     spots: 30,
+  },
+  {
+    id: 6,
+    latitude: 27.17985913757089, 
+    longitude: 78.0052575096488,
+    title: "Subhash Park Parking",
+    description: "Subhash Park Parking",
+    price: "Rs 20/hour",
+    spots: 30,
   }
 ]; 

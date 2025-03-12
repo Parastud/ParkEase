@@ -1,35 +1,30 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { StyleSheet } from 'react-native';
 import MapView, { Circle, PROVIDER_GOOGLE } from 'react-native-maps';
 import ParkingSpotMarker from './ParkingSpotMarker';
 import CustomLocationMarker from './CustomLocationMarker';
 
-const Map = ({
+const Map = forwardRef(({
   location,
   isCustomLocation,
   searchRadius,
   filteredParkingSpots,
   onLocationChange,
-  onParkingSelect
-}) => {
+  onPress,
+  onParkingSelect,
+  onLongPress
+}, ref) => {
   return (
     <MapView
+      ref={ref}
       provider={PROVIDER_GOOGLE}
       style={styles.map}
       region={location}
       showsUserLocation={!isCustomLocation}
       showsMyLocationButton={true}
       initialRegion={location}
-      onLongPress={(event) => {
-        const newLocation = {
-          latitude: event.nativeEvent.coordinate.latitude,
-          longitude: event.nativeEvent.coordinate.longitude,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        };
-        onLocationChange(newLocation);
-        alert('Location updated! Showing parking spots near the selected location.');
-      }}
+      onLongPress={onLongPress}
+      onPress={onPress}
     >
       {isCustomLocation && (
         <CustomLocationMarker location={location} />
@@ -52,7 +47,7 @@ const Map = ({
       ))}
     </MapView>
   );
-};
+});
 
 const styles = StyleSheet.create({
   map: {
