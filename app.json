@@ -4,12 +4,12 @@
     "slug": "ParkEase",
     "version": "1.0.0",
     "scheme": "ParkEase.com",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/wmremove-transformed.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -22,7 +22,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/wmremove-transformed.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.parastud.ParkEase",

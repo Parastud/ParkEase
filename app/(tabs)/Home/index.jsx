@@ -9,7 +9,7 @@ import { FIXED_PARKING_SPOTS } from '../../../constants/parkingData';
 import "../../../global.css";
 import { GlobalState } from '../../../constants/usecontext';
 import { router } from 'expo-router';
-// Memoize distance calculation function
+import * as ScreenOrientation from 'expo-screen-orientation';
 const getDistance = (lat1, lon1, lat2, lon2) => {
   const R = 6371;
   const dLat = deg2rad(lat2 - lat1);
@@ -29,7 +29,7 @@ function deg2rad(deg) {
 }
 
 export default function Home() {
-  const {modalVisible, setModalVisible} = useContext(GlobalState)
+  const {setModalVisible} = useContext(GlobalState)
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -46,8 +46,14 @@ export default function Home() {
   const mapRef = useRef(null);
   const searchTimeoutRef = useRef(null);
   const [isResettingLocation, setIsResettingLocation] = useState(false);
+  useEffect(() => {
 
-  // Memoize updateParkingSpots to prevent unnecessary recalculations
+    async function changeScreenOrientation() {
+  await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.ALL);
+}
+changeScreenOrientation();
+  }, []);
+
   const updateParkingSpots = useCallback((newLocation) => {
     if (!newLocation) return;
     
@@ -68,26 +74,21 @@ export default function Home() {
         router.push(`/(tabs)/Home/Booking/${selectedParking.id}`);
         
   }
-
-  // Debounce search to prevent too many API calls
   const searchLocations = useCallback(async (query) => {
     if (!query.trim()) {
       setSearchResults([]);
       return;
     }
-    
-    // Clear previous timeout
+  
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
     }
     
-    // Set a new timeout
     searchTimeoutRef.current = setTimeout(async () => {
       setIsSearching(true);
       try {
         const results = await Location.geocodeAsync(query);
         if (results.length > 0) {
-          // Process only the first 3 results for faster loading
           const locations = await Promise.all(
             results.slice(0, 3).map(async (result) => {
               const address = await Location.reverseGeocodeAsync({
@@ -209,14 +210,10 @@ const handleMapPress = ()=> {
       latitudeDelta: 0.0922,
       longitudeDelta: 0.0421,
     };
-
-    // Update location immediately for better responsiveness
     setLocation(newLocation);
     setIsCustomLocation(true);
     updateParkingSpots(newLocation);
     setSelectedParking(null);
-    
-    // Then fetch address in background
     try {
       const address = await Location.reverseGeocodeAsync({
         latitude: coordinate.latitude,
@@ -237,8 +234,6 @@ const handleMapPress = ()=> {
       setLocationName('Selected Location');
     }
   }, [updateParkingSpots]);
-
-  // Initial location setup
   useEffect(() => {
     let isMounted = true;
     

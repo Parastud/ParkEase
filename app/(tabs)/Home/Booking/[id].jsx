@@ -4,7 +4,7 @@ import { Link, useLocalSearchParams } from 'expo-router'
 import { FIXED_PARKING_SPOTS } from '../../../../constants/parkingData'
 import { GlobalState } from '../../../../constants/usecontext'
 import { Redirect } from 'expo-router'
-
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 const Booking = () => {
   const { id } = useLocalSearchParams();
@@ -13,7 +13,6 @@ const Booking = () => {
   useEffect(() => {
     const spot = FIXED_PARKING_SPOTS.find(spot => spot.id == id);
     setParkingSpot(spot);
-    console.log(spot)
 
   }, [id]);
 
@@ -28,7 +27,7 @@ const Booking = () => {
   return (
     <View>
 
-      {!modalVisible? <Redirect href={"/Home"}/>:""}
+      {!modalVisible? <Redirect href="/Home"/>:""}
             <Modal
               animationType="slide"
               transparent={true}
@@ -36,12 +35,12 @@ const Booking = () => {
               onRequestClose={() => setModalVisible(false)} // Required for Android
             >
     <View style={styles.container}>
+    <Ionicons name="arrow-back-circle" size={50} color={"gray"} onPress={()=>{setModalVisible(false)}}/>
       <Text style={styles.title}>{parkingSpot.title}</Text>
       <Text style={styles.details}>Location: {parkingSpot.description}</Text>
       <Text style={styles.details}>Price: {parkingSpot.price}</Text>
       <Text style={styles.details}>Available Spots: {parkingSpot.spots}</Text>
       <Link href="../" asChild>
-      <Button title='Go Back' onPress={()=>{setModalVisible(false)}}/>
       </Link>
     </View>
     </Modal>
