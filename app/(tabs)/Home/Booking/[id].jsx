@@ -40,8 +40,7 @@ const Booking = () => {
       <Text style={styles.details}>Location: {parkingSpot.description}</Text>
       <Text style={styles.details}>Price: {parkingSpot.price}</Text>
       <Text style={styles.details}>Available Spots: {parkingSpot.spots}</Text>
-      <Link href="../" asChild>
-      </Link>
+      <Button title='Book Now'/>
     </View>
     </Modal>
     </View>

@@ -52,5 +52,14 @@ export const FIXED_PARKING_SPOTS = [
     description: "Subhash Park Parking",
     price: "Rs 20/hour",
     spots: 30,
+  },
+  {
+    id: 7,
+    latitude: 27.60398680805452,
+    longitude: 77.59489562362432,
+    title: "GLA Parking",
+    description: "GLA University Parking",
+    price: "Rs 20/hour",
+    spots: 10,
   }
 ]; 

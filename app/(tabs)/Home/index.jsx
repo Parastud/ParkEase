@@ -153,10 +153,7 @@ changeScreenOrientation();
   }, []);
 
   const handleResetLocation = useCallback(async () => {
-    // Provide immediate feedback
     setIsResettingLocation(true);
-    
-    // First reset to a default state immediately for better UX
     if (location) {
       // Use current location but mark as "Your Location" immediately
       setLocationName('Your Location');
@@ -203,6 +200,7 @@ const handleMapPress = ()=> {
 
   const handleMapLongPress = useCallback(async (event) => {
     const { coordinate } = event.nativeEvent;
+    console.log(coordinate)
     
     const newLocation = {
       latitude: coordinate.latitude,
