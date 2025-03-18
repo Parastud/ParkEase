@@ -5,11 +5,11 @@
     "version": "1.0.0",
     "scheme": "ParkEase.com",
     "orientation": "default",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/adaptive-icon.png",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/wmremove-transformed.png",
+      "image": "./assets/adaptive-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -23,7 +23,7 @@
     "android": {
       "googleServicesFile":"./google-services.json",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/wmremove-transformed.png",
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.parastud.ParkEase",
