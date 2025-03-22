@@ -7,12 +7,25 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:444176514449:android:eaba4e1274288e3275ee30",
+        "mobilesdk_app_id": "1:444176514449:android:3c174e76b17986fe75ee30",
         "android_client_info": {
           "package_name": "com.parastud.ParkEase"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "444176514449-58mmhtg0l2qcorsnhmvsj2cba9fk2vk0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.parastud.ParkEase",
+            "certificate_hash": "9567a4f9e638798c6ad347aa73e4e6a2c169d728"
+          }
+        },
+        {
+          "client_id": "444176514449-li104t0v13vs1umgkbp5ni00daofp33j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBLptUfruPVlZRys5QmEF0sUe95DohaJ2w"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "444176514449-li104t0v13vs1umgkbp5ni00daofp33j.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

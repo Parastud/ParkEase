@@ -10,6 +10,7 @@ import "../../../global.css";
 import { GlobalState } from '../../../constants/usecontext';
 import { router } from 'expo-router';
 import * as ScreenOrientation from 'expo-screen-orientation';
+import Animated  from 'react-native-reanimated';
 const getDistance = (lat1, lon1, lat2, lon2) => {
   const R = 6371;
   const dLat = deg2rad(lat2 - lat1);
@@ -336,7 +337,7 @@ const handleMapPress = ()=> {
   }
 
   return (
-    <View style={styles.container}>
+    <Animated.View style={styles.container}>
       <View style={styles.searchContainer}>
         <View style={styles.topBar}>
           <Pressable 
@@ -487,7 +488,7 @@ const handleMapPress = ()=> {
         onBook={() => handlebooking(selectedParking)}
         onNavigate={() => openMapsNavigation(selectedParking)}
       />
-    </View>
+    </Animated.View>
   );
 }
 

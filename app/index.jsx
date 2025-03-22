@@ -4,7 +4,7 @@ import { Redirect } from 'expo-router'
 export default function main() {
   return (
     <View>
-      <Redirect href="/Home" />
+      <Redirect href="/Login" />
     </View>
   )
 }
