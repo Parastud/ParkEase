@@ -1,3 +1,9 @@
 import { createContext } from "react";
 
-export const GlobalState = createContext(0);
+// Initialize with default values for all context properties
+export const GlobalState = createContext({
+  modalVisible: false,
+  setModalVisible: () => {},
+  refreshBookings: false,
+  setRefreshBookings: () => {}
+});

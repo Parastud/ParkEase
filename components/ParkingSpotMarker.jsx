@@ -2,23 +2,52 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Marker, Callout } from 'react-native-maps';
 
-const ParkingSpotMarker = ({ parking, onPress }) => {
+const ParkingSpotMarker = ({ parking, onPress, isSelected = false }) => {
+  // Validate parking data
+  if (!parking) {
+    return null;
+  }
+  
+  // Ensure we have valid coordinates
+  const latitude = typeof parking.latitude === 'string' ? parseFloat(parking.latitude) : parking.latitude;
+  const longitude = typeof parking.longitude === 'string' ? parseFloat(parking.longitude) : parking.longitude;
+  
+  if (!latitude || !longitude || isNaN(latitude) || isNaN(longitude)) {
+    return null;
+  }
+  
+  // Format available spots
+  let availableSpotsText = 'Unknown';
+  if (typeof parking.availableSpots === 'number') {
+    availableSpotsText = parking.availableSpots.toString();
+  } else if (typeof parking.spots === 'number') {
+    availableSpotsText = parking.spots.toString();
+  }
+  
+  // Format price for display
+  let priceDisplay = typeof parking.price === 'number' ? `₹ ${parking.price}/hour` : parking.price;
+  if (!priceDisplay) {
+    priceDisplay = 'Price not available';
+  }
+  
   return (
     <Marker
       coordinate={{
-        latitude: parking.latitude,
-        longitude: parking.longitude
+        latitude,
+        longitude
       }}
       onPress={onPress}
-      pinColor="red"
+      pinColor={isSelected ? "blue" : "red"}
     >
       <Callout>
         <View style={styles.calloutContainer}>
-          <Text style={styles.calloutTitle}>{parking.title}</Text>
-          <Text style={styles.calloutDescription}>{parking.description}</Text>
-          <Text style={styles.calloutPrice}>Price: {parking.price}</Text>
-          <Text style={styles.calloutSpots}>Available spots: {parking.spots}</Text>
-          <Text style={styles.calloutDistance}>{parking.distance.toFixed(2)} km away</Text>
+          <Text style={styles.calloutTitle}>{parking.title || 'Parking Spot'}</Text>
+          <Text style={styles.calloutDescription}>{parking.description || 'No description available'}</Text>
+          <Text style={styles.calloutPrice}>Price: {priceDisplay}</Text>
+          <Text style={styles.calloutSpots}>Available spots: {availableSpotsText}</Text>
+          {parking.distance && (
+            <Text style={styles.calloutDistance}>{parking.distance.toFixed(2)} km away</Text>
+          )}
         </View>
       </Callout>
     </Marker>

@@ -1,12 +1,13 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, initializeAuth, getReactNativePersistence, onAuthStateChanged } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const firebaseConfig = {
   apiKey: "AIzaSyDpTGLuctyb6DMwYqxQTBW-9kPP20d_fu4",
   authDomain: "parkease-parastud.firebaseapp.com",
   projectId: "parkease-parastud",
-  storageBucket: "parkease-parastud.firebasestorage.app",
+  storageBucket: "parkease-parastud.appspot.com",
   messagingSenderId: "444176514449",
   appId: "1:444176514449:web:8fbe1fb7dc168cf775ee30",
   measurementId: "G-PLBX6LZFEC"
@@ -19,6 +20,9 @@ const app = initializeApp(firebaseConfig);
 const auth = initializeAuth(app, {
   persistence: getReactNativePersistence(AsyncStorage)
 });
+
+// Initialize Firestore
+const db = getFirestore(app);
 
 // Function to check if user is logged in
 const checkAuthState = () => {
@@ -40,4 +44,4 @@ const checkAuthState = () => {
   });
 };
 
-export { auth, checkAuthState };
+export { auth, db, checkAuthState };

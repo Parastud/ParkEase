@@ -1,7 +1,7 @@
 import { Button, SafeAreaView, StyleSheet, Text, TextInput, View, ActivityIndicator, Alert, TouchableOpacity } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import Animated,{FlipInEasyX,FlipOutEasyX} from 'react-native-reanimated'
-import { auth, checkAuthState } from '../../Firebase'
+import { auth, checkAuthState } from '../../firebase'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { useRouter } from 'expo-router'
 import AsyncStorage from '@react-native-async-storage/async-storage'
