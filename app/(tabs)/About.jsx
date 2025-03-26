@@ -12,6 +12,8 @@ import { checkIsRegisteredOwner } from '../../constants/parkingData'
 const About = () => {
   const router = useRouter()
   const [isCheckingOwner, setIsCheckingOwner] = useState(false)
+  const [isRegisteredOwner, setIsRegisteredOwner] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleOwnerDashboard = async () => {
     if (!auth.currentUser) {
@@ -24,47 +26,33 @@ const About = () => {
     
     try {
       setIsCheckingOwner(true)
-      const isOwner = await checkIsRegisteredOwner()
+      const ownerStatus = await checkIsRegisteredOwner()
+      setIsRegisteredOwner(ownerStatus)
       setIsCheckingOwner(false)
       
-      if (isOwner) {
+      if (ownerStatus) {
         router.push('/(owner)')
       } else {
         router.push('/(owner)/register')
       }
     } catch (error) {
-      console.error("Error checking owner status:", error)
-      Alert.alert("Error", "Could not verify owner status. Please try again.")
-      setIsCheckingOwner(false)
+      // Error checking owner status
     }
   }
 
   const handleLogout = async () => {
-    Alert.alert(
-      "Logout",
-      "Are you sure you want to logout?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel"
-        },
-        {
-          text: "Logout",
-          onPress: async () => {
-            try {
-              await signOut(auth)
-              
-              await AsyncStorage.removeItem('userSession')
-              
-              router.replace("/Login")
-            } catch (error) {
-              console.error("Logout error:", error)
-              Alert.alert("Error", "Failed to logout. Please try again.")
-            }
-          }
-        }
-      ]
-    )
+    setIsLoading(true)
+    try {
+      // Clear local storage to prevent state inconsistency
+      await AsyncStorage.removeItem('userSession')
+      // Sign out from Firebase
+      await signOut(auth)
+      // Navigate after both operations complete
+      router.replace('/(Auth)')
+    } catch (error) {
+      // Logout error
+      setIsLoading(false)
+    }
   }
 
   return (

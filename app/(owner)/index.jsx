@@ -56,13 +56,13 @@ const OwnerDashboard = () => {
         return;
       }
 
-      // Get all parking spots owned by this user
+
       const spots = await getParkingSpotsForOwner(auth.currentUser.uid);
       
-      // Get all bookings for this owner's spots
+
       const bookings = await getOwnerBookings();
       
-      // Calculate statistics
+
       const activeBookings = bookings.filter(booking => 
         booking.status === 'approved' && new Date(booking.endTime) > new Date()
       );

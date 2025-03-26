@@ -19,7 +19,6 @@ const notificationsCollectionRef = collection(db, 'notifications');
 //   try {
 //     // Code removed to prevent permission errors
 //   } catch (error) {
-//     console.warn('Collections initialization check failed, continuing anyway:', error.message);
 //   }
 // };
 
@@ -68,71 +67,6 @@ const removeUndefinedValues = (obj) => {
   return cleanedObj;
 };
 
-// Sample data for testing locally
-export const parkingList = [
-  {
-    id: '1',
-    title: 'Premium Parking Lot',
-    description: 'Secure parking in downtown, 24/7 surveillance',
-    location: {
-      latitude: 12.9716,
-      longitude: 77.5946
-    },
-    address: '100 Main St, Downtown',
-    price: '₹ 150/hour',
-    totalSpots: 25,
-    availableSpots: 10,
-    distance: '0.5',
-    features: {
-      security: true,
-      covered: true,
-      disabled: true,
-      electric: false,
-    }
-  },
-  {
-    id: '2',
-    title: 'City Center Parking',
-    description: 'Affordable parking near the mall',
-    location: {
-      latitude: 12.9719,
-      longitude: 77.5942
-    },
-    address: '250 Market St, City Center',
-    price: '₹ 100/hour',
-    totalSpots: 50,
-    availableSpots: 15,
-    distance: '0.8',
-    features: {
-      security: true,
-      covered: false,
-      disabled: true,
-      electric: false,
-    }
-  },
-  {
-    id: '3',
-    title: 'Budget Parking',
-    description: 'Low-cost parking option',
-    location: {
-      latitude: 12.9722,
-      longitude: 77.5932
-    },
-    address: '75 Budget Ave, Outskirts',
-    price: '₹ 80/hour',
-    totalSpots: 100,
-    availableSpots: 60,
-    distance: '1.2',
-    features: {
-      security: false,
-      covered: false,
-      disabled: false,
-      electric: false,
-    }
-  },
-  // Add more sample data as needed
-];
-
 // Convert Firestore document to parking spot object
 const convertDocToParkingSpot = (doc) => {
   return {
@@ -145,38 +79,21 @@ const convertDocToParkingSpot = (doc) => {
 // Function to fetch all parking spots from Firebase
 export const fetchParkingSpots = async () => {
   try {
-    console.log("Fetching parking spots from Firebase...");
     const querySnapshot = await getDocs(parkingCollectionRef);
     
-    // Use sample data if no spots are found
     if (querySnapshot.empty) {
-      console.log("No parking spots found in Firebase, using sample data");
-      return parkingList;
+      return [];
     }
     
     const parkingSpots = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),
-      // Format price to match the app's expected format if needed
       price: typeof doc.data().price === 'number' ? `₹ ${doc.data().price}/hour` : doc.data().price,
     }));
     
-    console.log(`Found ${parkingSpots.length} parking spots in Firebase`);
-    
-    // If we have spots but they're invalid, use sample data
-    if (parkingSpots.length === 0 || !parkingSpots.some(spot => 
-        spot.latitude && spot.longitude && 
-        !isNaN(spot.latitude) && !isNaN(spot.longitude))) {
-      console.log("Retrieved spots are invalid, using sample data instead");
-      return parkingList;
-    }
-    
     return parkingSpots;
   } catch (error) {
-    console.log("Error fetching parking spots:", error.message);
-    // Return sample data as fallback
-    console.log("Using sample data due to error");
-    return parkingList;
+    return [];
   }
 };
 
@@ -310,7 +227,6 @@ export const deleteParkingSpot = async (id) => {
     await deleteDoc(parkingDoc);
     return true;
   } catch (error) {
-    console.error('Error deleting parking spot:', error);
     throw error;
   }
 };
@@ -327,7 +243,6 @@ export const getParkingSpotById = async (id) => {
       throw new Error('Parking spot not found');
     }
   } catch (error) {
-    console.error('Error getting parking spot:', error);
     throw error;
   }
 };
@@ -382,7 +297,6 @@ export const registerParkingOwner = async (ownerData) => {
     
     return { success: true, ownerId };
   } catch (error) {
-    console.error('Error registering parking owner:', error);
     throw error;
   }
 };
@@ -404,7 +318,6 @@ export const getParkingOwnerDetails = async () => {
       return null; // No owner profile found
     }
   } catch (error) {
-    console.error('Error fetching owner details:', error);
     throw error;
   }
 };
@@ -449,7 +362,6 @@ export const uploadParkingImage = async (uri, name) => {
     
     throw new Error(`Unsupported URI format: ${uri}`);
   } catch (error) {
-    console.error('Error uploading image:', error);
     return 'https://via.placeholder.com/400x300?text=Image+Error';
   }
 };
@@ -465,7 +377,6 @@ export const getAllVerifiedOwners = async () => {
       ...doc.data()
     }));
   } catch (error) {
-    console.error('Error fetching verified owners:', error);
     return [];
   }
 };
@@ -515,7 +426,6 @@ export const createBooking = async (booking) => {
       throw new Error('Parking spot not found');
     }
   } catch (error) {
-    console.log('Error creating booking:', error.message);
     return { success: false, error: error.message };
   }
 };
@@ -524,20 +434,15 @@ export const createBooking = async (booking) => {
 export const getUserBookings = async () => {
   try {
     if (!auth.currentUser) {
-      console.log("No authenticated user found - cannot fetch bookings");
       throw new Error('You must be logged in to view your bookings');
     }
     
     const userId = auth.currentUser.uid;
-    console.log("Fetching bookings for user:", userId);
     
     // Query for bookings made by this user
     const q = query(bookingsCollectionRef, where("userId", "==", userId));
     const querySnapshot = await getDocs(q);
     
-    console.log(`Found ${querySnapshot.size} bookings in Firebase`);
-    
-    // Map the results to include document ID
     const bookings = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),
@@ -550,8 +455,7 @@ export const getUserBookings = async () => {
     
     return bookings;
   } catch (error) {
-    console.error("Error in getUserBookings:", error.message);
-    return []; // Return empty array instead of throwing error
+    return [];
   }
 };
 
@@ -622,7 +526,6 @@ export const cancelBooking = async (bookingId) => {
     
     throw new Error('Booking not found');
   } catch (error) {
-    console.log('Error cancelling booking:', error.message);
     return { success: false, error: error.message };
   }
 };
@@ -677,7 +580,6 @@ export const getOwnerBookings = async () => {
     
     return allBookings;
   } catch (error) {
-    console.error('Error fetching owner bookings:', error);
     throw error;
   }
 };
@@ -685,6 +587,11 @@ export const getOwnerBookings = async () => {
 // Function to check for expired bookings and update spot availability
 export const checkExpiredBookings = async () => {
   try {
+    // Skip if not authenticated
+    if (!auth.currentUser) {
+      return 0;
+    }
+
     const now = new Date();
     
     // Query for active bookings first
@@ -761,13 +668,12 @@ export const checkExpiredBookings = async () => {
           });
         }
       } catch (error) {
-        console.error(`Error processing expired booking ${item.id}:`, error);
+        // Silent error handling
       }
     }
     
     return batch.length; // Return count of processed bookings
   } catch (error) {
-    console.error('Error checking expired bookings:', error);
     return 0;
   }
 };
@@ -785,7 +691,6 @@ export const checkIsRegisteredOwner = async () => {
     
     return docSnap.exists();
   } catch (error) {
-    console.error('Error checking owner status:', error);
     return false;
   }
 };
@@ -827,7 +732,6 @@ export const getClosestParkingSpots = async (numSpots = 10, coordinates = null) 
     // Limit number of results
     return spots.slice(0, numSpots);
   } catch (error) {
-    console.error('Error fetching parking spots:', error);
     return [];
   }
 }; 

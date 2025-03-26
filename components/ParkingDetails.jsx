@@ -35,7 +35,7 @@ const ICONS = {
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    bottom: 75,
+    bottom: 10,
     left: 15,
     right: 15,
     borderRadius: 20,
@@ -179,8 +179,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   }
 });
-
-// Create fully memoized stable components
 const IconWrapper = memo(({ children }) => {
   return (
     <View style={styles.iconWrapper}>
@@ -199,8 +197,6 @@ const InfoItem = memo(({ icon, text }) => {
     </View>
   );
 });
-
-// Separate fully static content that never needs to re-render
 const StaticButtonLayout = memo(({ onBook, onNavigate }) => {
   return (
     <View style={styles.buttonContainer}>
@@ -223,8 +219,6 @@ const StaticButtonLayout = memo(({ onBook, onNavigate }) => {
     </View>
   );
 });
-
-// Create a memoized inner component to handle the animations
 const ParkingCard = memo(({ 
   parking, 
   onBook, 
@@ -232,7 +226,6 @@ const ParkingCard = memo(({
   onSwipeNext, 
   onSwipePrev 
 }) => {
-  // Default values to avoid runtime errors
   const {
     title = 'Parking Spot',
     price = 'Price unavailable',
@@ -243,10 +236,8 @@ const ParkingCard = memo(({
     hours = '24 hours',
     description = 'Convenient parking location with security and easy access.'
   } = parking;
-
-  // Swipe handling - use refs instead of state for values that don't trigger re-renders
   const translateX = useSharedValue(0);
-  const isAnimating = useSharedValue(0); // use 0/1 instead of boolean
+  const isAnimating = useSharedValue(0);
   
   const handleSwipeComplete = useCallback((direction) => {
     if (direction === 'left' && onSwipeNext) {

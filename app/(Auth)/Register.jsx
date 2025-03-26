@@ -1,6 +1,6 @@
 import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert, ScrollView } from 'react-native'
 import React, { useState } from 'react'
-import Animated, { FlipInEasyX, FlipOutEasyX } from 'react-native-reanimated'
+import Animated, { FadeInDown } from 'react-native-reanimated'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { auth } from '../../firebase'
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
@@ -8,13 +8,16 @@ import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
-export default function Register() {
+const Register = () => {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState({})
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [acceptTerms, setAcceptTerms] = useState(false)
   const router = useRouter()
 
   const validateForm = () => {
@@ -44,6 +47,11 @@ export default function Register() {
       newErrors.confirmPassword = 'Please confirm your password'
     } else if (password !== confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match'
+    }
+    
+    // Validate terms acceptance
+    if (!acceptTerms) {
+      newErrors.terms = 'You must accept the Terms & Conditions'
     }
     
     setErrors(newErrors)
@@ -95,104 +103,187 @@ export default function Register() {
       setIsLoading(false)
     }
   }
+  
+  const handleGoogleSignUp = async () => {
+    try {
+      setIsLoading(true);
+      
+      // This is just a placeholder for now
+      // We'll implement proper Google Sign Up when the native modules issue is resolved
+      setTimeout(() => {
+        // For testing purposes, let's just show an alert
+        Alert.alert("Google Sign Up", "Google Sign Up will be implemented in the production version.");
+        setIsLoading(false);
+      }, 1500);
+      
+    } catch (error) {
+      Alert.alert("Error", "Failed to start Google sign up process")
+      setIsLoading(false);
+    }
+  }
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <Animated.View 
-          entering={FlipInEasyX} 
-          exiting={FlipOutEasyX}
-          className="flex-1 p-6"
+    <ScrollView 
+      className="flex-1" 
+      contentContainerClassName="pb-12"
+      showsVerticalScrollIndicator={false}
+    >
+      <View className="px-6 py-6">
+        <Animated.Text 
+          entering={FadeInDown.delay(100).duration(500).springify()}
+          className="text-2xl font-bold text-gray-800 mb-1"
         >
-          <View className="items-center mb-6">
-            <Text className="text-3xl font-bold text-gray-800">Create Account</Text>
-            <Text className="text-gray-500 mt-2 text-center">
-              Sign up to start finding parking spots near you
+          Create Account
+        </Animated.Text>
+        <Animated.Text 
+          entering={FadeInDown.delay(200).duration(500).springify()}
+          className="text-gray-500 mb-6"
+        >
+          Sign up to find parking spots near you
+        </Animated.Text>
+        
+        <Animated.View 
+          entering={FadeInDown.delay(300).duration(500).springify()}
+          className="mb-4"
+        >
+          <Text className="text-gray-700 mb-2 font-medium">Full Name</Text>
+          <View className="flex-row items-center border border-gray-300 rounded-xl px-4 bg-gray-50">
+            <Ionicons name="person-outline" size={20} color="#6b7280" />
+            <TextInput
+              placeholder="John Doe"
+              value={name}
+              onChangeText={setName}
+              className="flex-1 py-3 px-2"
+              placeholderTextColor="#9ca3af"
+            />
+          </View>
+          {errors.name && <Text className="text-red-500 mt-1 ml-1 text-xs">{errors.name}</Text>}
+        </Animated.View>
+        
+        <Animated.View 
+          entering={FadeInDown.delay(400).duration(500).springify()}
+          className="mb-4"
+        >
+          <Text className="text-gray-700 mb-2 font-medium">Email Address</Text>
+          <View className="flex-row items-center border border-gray-300 rounded-xl px-4 bg-gray-50">
+            <Ionicons name="mail-outline" size={20} color="#6b7280" />
+            <TextInput
+              placeholder="example@email.com"
+              value={email}
+              onChangeText={setEmail}
+              className="flex-1 py-3 px-2"
+              placeholderTextColor="#9ca3af"
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+          </View>
+          {errors.email && <Text className="text-red-500 mt-1 ml-1 text-xs">{errors.email}</Text>}
+        </Animated.View>
+        
+        <Animated.View 
+          entering={FadeInDown.delay(500).duration(500).springify()}
+          className="mb-4"
+        >
+          <Text className="text-gray-700 mb-2 font-medium">Password</Text>
+          <View className="flex-row items-center border border-gray-300 rounded-xl px-4 bg-gray-50">
+            <Ionicons name="lock-closed-outline" size={20} color="#6b7280" />
+            <TextInput
+              placeholder="Min. 6 characters"
+              value={password}
+              onChangeText={setPassword}
+              className="flex-1 py-3 px-2"
+              placeholderTextColor="#9ca3af"
+              secureTextEntry={!showPassword}
+            />
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+              <Ionicons 
+                name={showPassword ? "eye-off-outline" : "eye-outline"} 
+                size={20} 
+                color="#6b7280" 
+              />
+            </TouchableOpacity>
+          </View>
+          {errors.password && <Text className="text-red-500 mt-1 ml-1 text-xs">{errors.password}</Text>}
+        </Animated.View>
+        
+        <Animated.View 
+          entering={FadeInDown.delay(600).duration(500).springify()}
+          className="mb-6"
+        >
+          <Text className="text-gray-700 mb-2 font-medium">Confirm Password</Text>
+          <View className="flex-row items-center border border-gray-300 rounded-xl px-4 bg-gray-50">
+            <Ionicons name="lock-closed-outline" size={20} color="#6b7280" />
+            <TextInput
+              placeholder="Confirm your password"
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              className="flex-1 py-3 px-2"
+              placeholderTextColor="#9ca3af"
+              secureTextEntry={!showConfirmPassword}
+            />
+            <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+              <Ionicons 
+                name={showConfirmPassword ? "eye-off-outline" : "eye-outline"} 
+                size={20} 
+                color="#6b7280" 
+              />
+            </TouchableOpacity>
+          </View>
+          {errors.confirmPassword && <Text className="text-red-500 mt-1 ml-1 text-xs">{errors.confirmPassword}</Text>}
+        </Animated.View>
+        
+        <Animated.View 
+          entering={FadeInDown.delay(700).duration(500).springify()}
+          className="mb-8"
+        >
+          <TouchableOpacity 
+            className="flex-row items-start" 
+            onPress={() => setAcceptTerms(!acceptTerms)}
+          >
+            <View className={`w-5 h-5 flex items-center justify-center rounded mt-0.5 mr-3 ${acceptTerms ? 'bg-blue-500' : 'border border-gray-300'}`}>
+              {acceptTerms && <Ionicons name="checkmark" size={14} color="#fff" />}
+            </View>
+            <Text className="text-gray-600 flex-1">
+              I accept the <Text className="text-blue-500 font-medium">Terms of Service</Text> and <Text className="text-blue-500 font-medium">Privacy Policy</Text>
             </Text>
-          </View>
-          
-          <View className="mb-6">
-            <View className="mb-4">
-              <Text className="text-gray-700 mb-1 font-medium">Full Name</Text>
-              <View className="flex-row items-center border rounded-xl bg-gray-50 px-3">
-                <Ionicons name="person-outline" size={20} color="#9ca3af" />
-                <TextInput
-                  placeholder="John Doe"
-                  value={name}
-                  onChangeText={setName}
-                  className="flex-1 p-3"
-                  placeholderTextColor="#9ca3af"
-                />
-              </View>
-              {errors.name ? <Text className="text-red-500 mt-1">{errors.name}</Text> : null}
-            </View>
-            
-            <View className="mb-4">
-              <Text className="text-gray-700 mb-1 font-medium">Email</Text>
-              <View className="flex-row items-center border rounded-xl bg-gray-50 px-3">
-                <Ionicons name="mail-outline" size={20} color="#9ca3af" />
-                <TextInput
-                  placeholder="example@email.com"
-                  value={email}
-                  onChangeText={setEmail}
-                  className="flex-1 p-3"
-                  placeholderTextColor="#9ca3af"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                />
-              </View>
-              {errors.email ? <Text className="text-red-500 mt-1">{errors.email}</Text> : null}
-            </View>
-            
-            <View className="mb-4">
-              <Text className="text-gray-700 mb-1 font-medium">Password</Text>
-              <View className="flex-row items-center border rounded-xl bg-gray-50 px-3">
-                <Ionicons name="lock-closed-outline" size={20} color="#9ca3af" />
-                <TextInput
-                  placeholder="Min. 6 characters"
-                  value={password}
-                  onChangeText={setPassword}
-                  className="flex-1 p-3"
-                  placeholderTextColor="#9ca3af"
-                  secureTextEntry
-                />
-              </View>
-              {errors.password ? <Text className="text-red-500 mt-1">{errors.password}</Text> : null}
-            </View>
-            
-            <View className="mb-6">
-              <Text className="text-gray-700 mb-1 font-medium">Confirm Password</Text>
-              <View className="flex-row items-center border rounded-xl bg-gray-50 px-3">
-                <Ionicons name="lock-closed-outline" size={20} color="#9ca3af" />
-                <TextInput
-                  placeholder="Confirm your password"
-                  value={confirmPassword}
-                  onChangeText={setConfirmPassword}
-                  className="flex-1 p-3"
-                  placeholderTextColor="#9ca3af"
-                  secureTextEntry
-                />
-              </View>
-              {errors.confirmPassword ? <Text className="text-red-500 mt-1">{errors.confirmPassword}</Text> : null}
-            </View>
-          </View>
-          
+          </TouchableOpacity>
+          {errors.terms && <Text className="text-red-500 mt-1 ml-1 text-xs">{errors.terms}</Text>}
+        </Animated.View>
+        
+        <Animated.View entering={FadeInDown.delay(800).duration(500).springify()}>
           <TouchableOpacity
-            className={`bg-blue-500 p-4 rounded-xl mb-4 ${isLoading ? 'opacity-70' : ''}`}
+            className={`bg-blue-500 py-4 rounded-xl mb-4 ${isLoading || !acceptTerms ? 'opacity-70' : ''}`}
             onPress={handleRegister}
-            disabled={isLoading}
+            disabled={isLoading || !acceptTerms}
           >
             {isLoading ? (
               <ActivityIndicator color="white" />
             ) : (
-              <Text className="text-white text-center font-semibold text-lg">
+              <Text className="text-white text-center font-bold text-lg">
                 Create Account
               </Text>
             )}
           </TouchableOpacity>
           
-        </Animated.View>
-      </ScrollView>
-    </SafeAreaView>
+          <View className="flex-row justify-center items-center mb-2">
+            <View className="flex-1 h-0.5 bg-gray-200" />
+            <Text className="px-4 text-gray-500">or signup with</Text>
+            <View className="flex-1 h-0.5 bg-gray-200" />
+          </View>
+          
+          <View className="flex-row justify-center">
+            <TouchableOpacity 
+              className="w-12 h-12 rounded-full bg-gray-100 items-center justify-center border border-gray-200"
+              onPress={handleGoogleSignUp}
+              disabled={isLoading}
+            >
+              <Ionicons name="logo-google" size={20} color="#EA4335" />
+            </TouchableOpacity>
+          </View>
+    </Animated.View>
+      </View>
+    </ScrollView>
   )
 }
+
+export default Register

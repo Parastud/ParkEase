@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
-import { Text, View } from 'react-native';
-import { checkAuthState } from './firebase';
+import { checkAuthState, auth } from './firebase';
 
 export default function App() {
   useEffect(() => {
@@ -8,12 +7,18 @@ export default function App() {
       try {
         await checkAuthState();
       } catch (error) {
-        console.error('Error initializing auth:', error);
+        // Error initializing auth
       }
     };
     
     initializeAuth();
+
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      // User state changed
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  return null; // This component doesn't render anything as it's handled by expo-router
+  return null;
 }

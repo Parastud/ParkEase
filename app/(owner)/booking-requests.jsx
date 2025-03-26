@@ -19,7 +19,7 @@ export default function BookingRequests() {
   const [bookings, setBookings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [filter, setFilter] = useState('all'); // 'all', 'active', 'completed', 'cancelled'
+  const [filter, setFilter] = useState('all');
 
   useFocusEffect(
     useCallback(() => {
@@ -68,13 +68,13 @@ export default function BookingRequests() {
         return;
       }
       
-      // Check for expired bookings first
+
       await checkExpiredBookings();
       
-      // Get all bookings for spots owned by this user
+
       const ownerBookings = await getOwnerBookings();
       
-      // Sort bookings by date (newest first)
+
       const sortedBookings = ownerBookings.sort((a, b) => {
         const dateA = a.createdAt ? new Date(a.createdAt) : new Date();
         const dateB = b.createdAt ? new Date(b.createdAt) : new Date();
@@ -133,7 +133,7 @@ export default function BookingRequests() {
               setIsLoading(true);
               await approveBooking(bookingId);
               
-              // Reload bookings to get fresh data
+
               await loadBookings();
               
               Alert.alert("Success", "Booking has been approved successfully.");
@@ -162,7 +162,7 @@ export default function BookingRequests() {
               setIsLoading(true);
               await rejectBooking(bookingId);
               
-              // Reload bookings to get fresh data
+
               await loadBookings();
               
               Alert.alert("Success", "Booking has been rejected successfully.");
@@ -178,7 +178,7 @@ export default function BookingRequests() {
   };
 
   const filteredBookings = () => {
-    if (filter === 'all') return bookings;
+    if (filter === 'all') {bookings.sort((a, b) => new Date(b.startTime) - new Date(a.startTime)); return bookings;}
     
     return bookings.filter(booking => {
       if (filter === 'active') 
@@ -189,9 +189,9 @@ export default function BookingRequests() {
 
   const renderBookingItem = ({ item }) => {
     const startTime = formatDate(item.startTime);
-    const endTime = formatDate(item.endTime);
+    const endTime = formatDate(item.endTime)
     
-    // Check if booking is in the past
+
     const isPast = new Date(item.endTime) < new Date();
     const isPending = item.status === 'pending';
     const displayStatus = item.status.toUpperCase();

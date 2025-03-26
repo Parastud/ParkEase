@@ -55,6 +55,7 @@ export default function Bookings() {
       if (userBookings.length === 0) {
         setBookings([]);
       } else {
+        userBookings.sort((a, b) => new Date(b.startTime) - new Date(a.startTime) );
         setBookings(userBookings);
       }
       
@@ -74,13 +75,13 @@ export default function Bookings() {
     switch (status) {
       case 'confirmed':
       case 'active':
-        return '#4CAF50'; // Green
+        return '#4CAF50';
       case 'cancelled':
-        return '#F44336'; // Red
+        return '#F44336';
       case 'completed':
-        return '#2196F3'; // Blue
+        return '#2196F3'; 
       default:
-        return '#9E9E9E'; // Gray
+        return '#9E9E9E';
     }
   };
 
@@ -98,7 +99,7 @@ export default function Bookings() {
               setIsLoading(true);
               await cancelBooking(bookingId);
               
-              // Reload all bookings to get fresh data
+
               await loadUserBookings();
               
               Alert.alert("Success", "Your booking has been cancelled successfully.");
@@ -117,14 +118,9 @@ export default function Bookings() {
     const startTime = formatDate(item.startTime);
     const endTime = formatDate(item.endTime);
     const isCancellable = item.status === 'confirmed' || item.status === 'active';
-    
-    // Check if booking is in the past
     const isPast = new Date(item.endTime) < new Date();
-    
-    // Format the status for display
+
     let displayStatus = item.status === 'active' ? 'ACTIVE' : item.status.toUpperCase();
-    
-    // If booking is past end time but still active, mark as "COMPLETED"
     if (isPast && (item.status === 'active' || item.status === 'confirmed')) {
       displayStatus = 'COMPLETED';
     }
@@ -136,7 +132,7 @@ export default function Bookings() {
           <View style={[
             styles.statusBadge, 
             { backgroundColor: isPast && (item.status === 'active' || item.status === 'confirmed') 
-              ? '#2196F3' // Blue for completed
+              ? '#2196F3'
               : getStatusColor(item.status) 
             }
           ]}>

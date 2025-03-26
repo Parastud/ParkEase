@@ -92,7 +92,7 @@ export default function OwnerProfile() {
           profileImage: userData.profileImage || null,
         });
       } else {
-        // If no profile exists yet, initialize with email from auth
+
         setProfileData({
           ...profileData,
           email: auth.currentUser.email || '',
@@ -112,7 +112,7 @@ export default function OwnerProfile() {
       [field]: value
     });
     
-    // Clear error when user types
+
     if (errors[field]) {
       setErrors({
         ...errors,
@@ -185,7 +185,7 @@ export default function OwnerProfile() {
       const userId = auth.currentUser.uid;
       const userRef = doc(db, "users", userId);
       
-      // Check if we need to upload a new profile image
+
       let profileImageUrl = profileData.profileImage;
       if (profileData.profileImage && profileData.profileImage.startsWith('file://')) {
         profileImageUrl = await uploadProfileImage(profileData.profileImage);

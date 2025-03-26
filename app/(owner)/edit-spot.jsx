@@ -103,7 +103,7 @@ export default function EditParkingSpot() {
       setIsLoading(true);
       const spot = await getParkingSpotById(id);
       
-      // Check if the spot belongs to the current user
+
       if (spot.ownerId !== auth.currentUser?.uid) {
         Alert.alert(
           "Access Denied",
@@ -113,18 +113,18 @@ export default function EditParkingSpot() {
         return;
       }
       
-      // Ensure location data is properly formatted with numerical values
+
       let locationData = {
         latitude: 40.7128,
         longitude: -74.0060
       };
 
-      // Try to get location from spot data - ensure values are numbers
+
       if (spot.location) {
         if (typeof spot.location.latitude === 'number' && typeof spot.location.longitude === 'number') {
           locationData = spot.location;
         } 
-        // Try latitude/longitude at the top level if location object doesn't have valid coordinates
+
         else if (typeof spot.latitude === 'number' && typeof spot.longitude === 'number') {
           locationData = {
             latitude: spot.latitude,
@@ -133,7 +133,7 @@ export default function EditParkingSpot() {
         }
       }
       
-      // Format numeric values as strings for the form
+
       setSpotData({
         ...spot,
         location: locationData,
@@ -147,7 +147,7 @@ export default function EditParkingSpot() {
         }
       });
       
-      // Update map region with the valid location data
+
       setMapRegion({
         latitude: locationData.latitude,
         longitude: locationData.longitude,
@@ -175,7 +175,7 @@ export default function EditParkingSpot() {
     if (!spotData.price.trim()) newErrors.price = 'Price is required';
     if (!spotData.totalSpots.trim()) newErrors.totalSpots = 'Total spots is required';
     
-    // Validate location coordinates
+
     if (!spotData.location || typeof spotData.location.latitude !== 'number' || typeof spotData.location.longitude !== 'number') {
       newErrors.location = 'Please set a valid location on the map';
     }
@@ -201,7 +201,7 @@ export default function EditParkingSpot() {
       });
     }
     
-    // Clear error when user types
+
     if (errors[field]) {
       setErrors({
         ...errors,
@@ -233,7 +233,7 @@ export default function EditParkingSpot() {
   const handleMapPress = (e) => {
     const { latitude, longitude } = e.nativeEvent.coordinate;
     
-    // Ensure coordinates are valid numbers
+
     if (typeof latitude === 'number' && typeof longitude === 'number') {
       setSpotData({
         ...spotData,
@@ -245,7 +245,7 @@ export default function EditParkingSpot() {
         longitude
       });
       
-      // Clear location error if it exists
+
       if (errors.location) {
         setErrors({
           ...errors,
@@ -266,12 +266,12 @@ export default function EditParkingSpot() {
         return;
       }
       
-      // Get current position
+
       const location = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.High
       });
       
-      // Update form data with coordinates
+
       const { latitude, longitude } = location.coords;
       setSpotData({
         ...spotData,
@@ -279,7 +279,7 @@ export default function EditParkingSpot() {
         longitude: String(longitude)
       });
       
-      // Try to get address from coordinates
+
       try {
         const addressResponse = await Location.reverseGeocodeAsync({
           latitude,
@@ -306,7 +306,7 @@ export default function EditParkingSpot() {
           }));
         }
       } catch (error) {
-        // Address lookup failed, but we still have coordinates
+
         setErrors(prev => ({
           ...prev,
           address: 'Could not determine address, please enter manually.'
@@ -329,20 +329,20 @@ export default function EditParkingSpot() {
     setIsSubmitting(true);
     
     try {
-      // Extract location coordinates
+
       const { latitude, longitude } = spotData.location;
       
-      // Convert string values to numbers
+
       const totalSpots = parseInt(spotData.totalSpots, 10);
       
       const spotDataForSubmit = {
         ...spotData,
-        // Explicitly include latitude and longitude at the top level
+
         latitude,
         longitude,
         price: parseFloat(spotData.price),
         totalSpots: totalSpots,
-        // Pass the image as is - the backend will handle the upload
+
         image: spotData.image,
       };
       

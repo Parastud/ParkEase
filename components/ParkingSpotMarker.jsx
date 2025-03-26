@@ -3,12 +3,12 @@ import { View, Text, StyleSheet } from 'react-native';
 import { Marker, Callout } from 'react-native-maps';
 
 const ParkingSpotMarker = ({ parking, onPress, isSelected = false }) => {
-  // Validate parking data
+
   if (!parking) {
     return null;
   }
   
-  // Ensure we have valid coordinates
+
   const latitude = typeof parking.latitude === 'string' ? parseFloat(parking.latitude) : parking.latitude;
   const longitude = typeof parking.longitude === 'string' ? parseFloat(parking.longitude) : parking.longitude;
   
@@ -16,7 +16,7 @@ const ParkingSpotMarker = ({ parking, onPress, isSelected = false }) => {
     return null;
   }
   
-  // Format available spots
+
   let availableSpotsText = 'Unknown';
   if (typeof parking.availableSpots === 'number') {
     availableSpotsText = parking.availableSpots.toString();
@@ -24,7 +24,7 @@ const ParkingSpotMarker = ({ parking, onPress, isSelected = false }) => {
     availableSpotsText = parking.spots.toString();
   }
   
-  // Format price for display
+
   let priceDisplay = typeof parking.price === 'number' ? `₹ ${parking.price}/hour` : parking.price;
   if (!priceDisplay) {
     priceDisplay = 'Price not available';

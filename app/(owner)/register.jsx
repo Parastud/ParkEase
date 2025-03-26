@@ -61,11 +61,11 @@ export default function OwnerRegistration() {
       const docSnap = await getDoc(userRef);
       
       if (docSnap.exists()) {
-        // User is already registered as a parking owner
+
         setIsAlreadyRegistered(true);
         const ownerData = docSnap.data();
         
-        // Pre-fill the form with existing data
+
         setFormData({
           businessName: ownerData.businessName || '',
           address: ownerData.address || '',
@@ -90,7 +90,7 @@ export default function OwnerRegistration() {
       [field]: value
     });
     
-    // Clear error when user types
+
     if (errors[field]) {
       setErrors({
         ...errors,
@@ -125,7 +125,7 @@ export default function OwnerRegistration() {
       const userId = auth.currentUser.uid;
       const userEmail = auth.currentUser.email;
       
-      // Create or update the parking owner document
+
       await setDoc(doc(db, "parkingOwners", userId), {
         ...formData,
         userId,
@@ -135,7 +135,7 @@ export default function OwnerRegistration() {
         status: isAlreadyRegistered ? 'active' : 'pending', // New registrations might need approval
       });
       
-      // Also update the user's main profile
+
       await setDoc(doc(db, "users", userId), {
         name: auth.currentUser.displayName || '',
         email: userEmail,

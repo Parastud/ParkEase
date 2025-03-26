@@ -27,6 +27,7 @@ import { router } from 'expo-router';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import ModalSwipe from '../../../components/ModalSwipe';
+import { auth } from '../../../firebase';
 
 const { height, width } = Dimensions.get('window');
 
@@ -87,8 +88,11 @@ changeScreenOrientation();
     const loadParkingSpots = async () => {
       setIsFetchingParkingData(true);
       try {
-        // Check for expired bookings first
-        await checkExpiredBookings();
+        // Skip expired bookings check if not authenticated
+        if (auth?.currentUser) {
+          // Check for expired bookings first
+          await checkExpiredBookings();
+        }
         
         // Then get the latest data
         const spotsFromFirebase = await fetchParkingSpots();
@@ -158,6 +162,7 @@ changeScreenOrientation();
           setParkingSpots(processedSpots);
         }
       } catch (error) {
+        console.error("Error loading parking spots:", error.message);
         setApiError('Failed to load parking spots from Firebase');
         // Set empty array instead of using static data
         setParkingSpots([]);
@@ -215,11 +220,9 @@ changeScreenOrientation();
       }
       
       // If all validations pass, proceed with booking
-      console.log("Booking parking:", parking.id);
       setModalVisible(true);
       router.push(`/(tabs)/Home/Booking/${parking.id}`);
     } catch (error) {
-      console.error("Booking error:", error);
       Alert.alert(
         "Error",
         "There was a problem processing your booking. Please try again later."
@@ -640,69 +643,41 @@ changeScreenOrientation();
   // Modify handleOpenParkingDetails to use the focus function
   const handleOpenParkingDetails = useCallback(() => {
     try {
-      // Debug logging
-      console.log('Running handleOpenParkingDetails');
-      console.log('parkingSpots count:', parkingSpots.length);
-      console.log('filteredParkingSpots count:', filteredParkingSpots.length);
-      
-      // Check if we have any parkingSpots at all
       if (!parkingSpots || parkingSpots.length === 0) {
-        console.log('No parking spots available');
-        Alert.alert(
-          'No Parking Spots',
-          'No parking spots are available in the database. Please try again later.',
-          [{ text: 'OK' }]
-        );
+        Alert.alert("No Parking Spots", "No parking spots available in this area.");
         return;
       }
-      
-      // Make sure we have filtered parking spots with valid data
-      if (!filteredParkingSpots || !Array.isArray(filteredParkingSpots) || filteredParkingSpots.length === 0) {
-        console.log('No filtered parking spots');
-        Alert.alert(
-          'No Parking Spots Nearby',
-          'No parking spots found in this area. Try increasing the search radius or moving to a different location.',
-          [{ text: 'OK' }]
-        );
-        return;
-      }
-      
-      // Sort by distance if available
-      const sortedSpots = [...filteredParkingSpots].sort((a, b) => {
-        if (a.distance && b.distance) {
-          return a.distance - b.distance;
-        }
-        return 0;
-      });
-      
-      console.log('First spot after sorting:', JSON.stringify(sortedSpots[0]));
-      
-      // Ensure the first spot has an id and valid coordinates
-      const firstSpot = sortedSpots[0];
-      if (!firstSpot || !firstSpot.id || !firstSpot.latitude || !firstSpot.longitude) {
-        console.log('Invalid first spot data:', firstSpot);
-        Alert.alert(
-          'Invalid Data',
-          'The parking spot data is incomplete. Please try refreshing the app.',
-          [{ text: 'OK' }]
-        );
-        return;
-      }
-      
-      console.log('Setting selected parking:', firstSpot.id);
-      // Select the closest one
-      setSelectedParking(firstSpot);
-      // Focus the map on this spot with proper positioning
-      focusOnParkingSpot(firstSpot);
-    } catch (error) {
-      console.error('Error selecting parking spot:', error);
-      Alert.alert(
-        'Error',
-        'There was a problem selecting a parking spot. Please try again.',
-        [{ text: 'OK' }]
+
+      // Filter spots within the search radius
+      const filteredParkingSpots = parkingSpots.filter(spot => 
+        typeof spot.distance === 'number' && spot.distance <= searchRadius
       );
+
+      if (filteredParkingSpots.length === 0) {
+        Alert.alert("No Nearby Spots", "No parking spots found in your selected radius. Try increasing the search distance.");
+        return;
+      }
+
+      // Sort by distance (closest first)
+      const sortedSpots = [...filteredParkingSpots].sort((a, b) => {
+        return a.distance - b.distance;
+      });
+
+      // Select the closest spot
+      const firstSpot = sortedSpots[0];
+      
+      if (!firstSpot || !firstSpot.id) {
+        Alert.alert("Error", "Unable to select parking spot. Please try again.");
+        return;
+      }
+
+      // Set this spot as selected
+      setSelectedParking(firstSpot);
+
+    } catch (error) {
+      Alert.alert("Error", "There was a problem selecting a parking spot. Please try again.");
     }
-  }, [filteredParkingSpots, parkingSpots, focusOnParkingSpot]);
+  }, [parkingSpots, searchRadius]);
 
   // Loading state with minimal UI
   if (errorMsg) {

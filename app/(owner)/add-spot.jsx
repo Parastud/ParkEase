@@ -105,13 +105,13 @@ export default function AddParkingSpot() {
       
       const { latitude, longitude } = location.coords;
       
-      // Update spot data with current location
+
       setSpotData(prevData => ({
         ...prevData,
         location: { latitude, longitude }
       }));
       
-      // Update map region to center on current location
+
       setMapRegion({
         latitude,
         longitude,
@@ -119,7 +119,7 @@ export default function AddParkingSpot() {
         longitudeDelta: 0.005
       });
       
-      // Try to get address from coordinates
+
       try {
         const addressResponse = await Location.reverseGeocodeAsync({
           latitude,
@@ -146,7 +146,7 @@ export default function AddParkingSpot() {
           }));
         }
       } catch (error) {
-        // Address lookup failed, but we still have coordinates
+
         setErrors(prev => ({
           ...prev,
           address: 'Could not determine address, please enter manually.'
@@ -168,7 +168,7 @@ export default function AddParkingSpot() {
     if (!spotData.price.trim()) newErrors.price = 'Price is required';
     if (!spotData.totalSpots.trim()) newErrors.totalSpots = 'Total spots is required';
     
-    // Validate location coordinates
+
     if (!spotData.location || typeof spotData.location.latitude !== 'number' || typeof spotData.location.longitude !== 'number') {
       newErrors.location = 'Please set a valid location on the map';
     }
@@ -194,7 +194,7 @@ export default function AddParkingSpot() {
       });
     }
     
-    // Clear error when user types
+
     if (errors[field]) {
       setErrors({
         ...errors,
@@ -226,7 +226,7 @@ export default function AddParkingSpot() {
   const handleMapPress = (e) => {
     const { latitude, longitude } = e.nativeEvent.coordinate;
     
-    // Ensure coordinates are valid numbers
+
     if (typeof latitude === 'number' && typeof longitude === 'number') {
       setSpotData({
         ...spotData,
@@ -238,7 +238,7 @@ export default function AddParkingSpot() {
         longitude
       });
       
-      // Clear location error if it exists
+
       if (errors.location) {
         setErrors({
           ...errors,
@@ -257,15 +257,15 @@ export default function AddParkingSpot() {
     setIsSubmitting(true);
     
     try {
-      // Extract location coordinates
+
       const { latitude, longitude } = spotData.location;
       
-      // Convert string values to numbers
+
       const totalSpots = parseInt(spotData.totalSpots, 10);
       
       const spotDataForSubmit = {
         ...spotData,
-        // Explicitly include latitude and longitude at the top level
+
         latitude,
         longitude,
         price: parseFloat(spotData.price),

@@ -61,7 +61,7 @@ export default function MyParkingSpots() {
       setIsLoading(true);
       setError(null);
       
-      // Check for authenticated user
+
       if (!auth.currentUser) {
         setError('You must be logged in to view your parking spots');
         setIsLoading(false);
@@ -71,7 +71,7 @@ export default function MyParkingSpots() {
       const userId = auth.currentUser.uid;
       const userSpots = await getParkingSpotsForOwner(userId);
       
-      // Sort spots by creation date (newest first)
+
       const sortedSpots = userSpots.sort((a, b) => {
         const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
         const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
@@ -107,7 +107,7 @@ export default function MyParkingSpots() {
   const handleDelete = async (id) => {
     try {
       await deleteParkingSpot(id);
-      // Update the local state after successful deletion
+
       setSpots(spots.filter(spot => spot.id !== id));
       Alert.alert("Success", "Parking spot deleted successfully.");
     } catch (error) {

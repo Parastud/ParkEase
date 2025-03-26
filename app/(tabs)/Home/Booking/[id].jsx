@@ -280,7 +280,7 @@ export default function Booking() {
             setParkingSpot(freshSpotData);
           }
         } catch (error) {
-          console.error("Error refreshing parking spot data:", error);
+          // Error handling
         }
       };
       

@@ -14,7 +14,6 @@ export default function OwnerLayout() {
         drawerActiveTintColor: '#007BFF',
         drawerInactiveTintColor: '#333',
         drawerLabelStyle: {
-          marginLeft: -20,
           fontSize: 16,
         },
       }}>
@@ -77,5 +76,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    top:25,
   },
 }); 

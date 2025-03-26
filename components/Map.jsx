@@ -115,15 +115,6 @@ const Map = forwardRef(({
       >
         <Ionicons name="locate" size={24} color="#007AFF" />
       </TouchableOpacity>
-
-      {/* Display parking count */}
-      {validSpots.length > 0 && (
-        <View style={styles.spotCountContainer}>
-          <Text style={styles.spotCountText}>
-            {validSpots.length} Parking Spot{validSpots.length !== 1 ? 's' : ''} Found
-          </Text>
-        </View>
-      )}
     </View>
   );
 });
