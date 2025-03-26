@@ -290,8 +290,8 @@ export default function Booking() {
 
   if (isLoading) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.loadingText}>Loading parking spot details...</Text>
+      <View style={styles.container} className='justify-center'>
+        <ActivityIndicator size="large" color="#007AFF" />
       </View>
     );
   }
@@ -307,10 +307,10 @@ export default function Booking() {
   return (
     <View>
       {!modalVisible ? <Redirect href="/Home"/> : null}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
+            <Modal
+              animationType="slide"
+              transparent={true}
+              visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
         <View style={styles.modalContainer}>
@@ -344,7 +344,7 @@ export default function Booking() {
                 </View>
                 
                 <View style={styles.infoSection}>
-                  <Text style={styles.title}>{parkingSpot.title}</Text>
+      <Text style={styles.title}>{parkingSpot.title}</Text>
                   
                   <View style={[
                     styles.availableSpotsBadge, 
@@ -461,8 +461,8 @@ export default function Booking() {
               </ScrollView>
             )}
           </View>
-        </View>
-      </Modal>
+    </View>
+    </Modal>
     </View>
   );
 }

@@ -1,7 +1,22 @@
-import React, { useEffect, useState, useRef, useCallback, useMemo,useContext } from 'react';
-import { StyleSheet, View, ActivityIndicator, Text, Linking, Platform, TextInput, TouchableOpacity, FlatList, Pressable } from 'react-native';
+import React, { useEffect, useState, useRef, useCallback, useMemo, useContext } from 'react';
+import { 
+  StyleSheet, 
+  View, 
+  ActivityIndicator, 
+  Text, 
+  Linking, 
+  Platform, 
+  TextInput, 
+  TouchableOpacity, 
+  FlatList, 
+  Pressable, 
+  Dimensions,
+  StatusBar,
+  Image,
+  Alert
+} from 'react-native';
 import * as Location from 'expo-location';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import Slider from '@react-native-community/slider';
 import Map from '../../../components/Map';
 import ParkingDetails from '../../../components/ParkingDetails';
@@ -10,7 +25,11 @@ import "../../../global.css";
 import { GlobalState } from '../../../constants/usecontext';
 import { router } from 'expo-router';
 import * as ScreenOrientation from 'expo-screen-orientation';
-import Animated  from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import ModalSwipe from '../../../components/ModalSwipe';
+
+const { height, width } = Dimensions.get('window');
+
 const getDistance = (lat1, lon1, lat2, lon2) => {
   const R = 6371;
   const dLat = deg2rad(lat2 - lat1);
@@ -23,7 +42,6 @@ const getDistance = (lat1, lon1, lat2, lon2) => {
   const d = R * c;
   return d;
 }
-
 
 function deg2rad(deg) {
   return deg * (Math.PI / 180);
@@ -167,11 +185,48 @@ changeScreenOrientation();
     setParkingSpots(spotsWithDistances);
   }, []); // Empty dependency array to avoid recreation
 
-  const handlebooking = () => {
-        setModalVisible(true)
-        router.push(`/(tabs)/Home/Booking/${selectedParking.id}`);
-        
-  }
+  const handlebooking = useCallback((parking) => {
+    try {
+      // Validate parking object
+      if (!parking) {
+        Alert.alert(
+          "Error",
+          "No parking spot selected. Please select a valid parking spot first."
+        );
+        return;
+      }
+      
+      // Check if parking ID exists
+      if (!parking.id) {
+        Alert.alert(
+          "Error",
+          "Invalid parking data. Please try selecting the parking spot again."
+        );
+        return;
+      }
+      
+      // Check if parking has available spots
+      if (!parking.availableSpots || parking.availableSpots <= 0) {
+        Alert.alert(
+          "Sorry",
+          "This parking spot is no longer available. Please choose another spot."
+        );
+        return;
+      }
+      
+      // If all validations pass, proceed with booking
+      console.log("Booking parking:", parking.id);
+      setModalVisible(true);
+      router.push(`/(tabs)/Home/Booking/${parking.id}`);
+    } catch (error) {
+      console.error("Booking error:", error);
+      Alert.alert(
+        "Error",
+        "There was a problem processing your booking. Please try again later."
+      );
+    }
+  }, [router, setModalVisible]);
+
   const searchLocations = useCallback(async (query) => {
     if (!query.trim()) {
       setSearchResults([]);
@@ -289,9 +344,24 @@ changeScreenOrientation();
     }
   }, [location, parkingSpots, searchRadius, updateParkingSpots]);
 
-const handleMapPress = useCallback(() => {
+  // Modify handleMapPress to properly close parking details and remove focus
+  const handleMapPress = useCallback(() => {
+    if (selectedParking) {
+      // Close the parking details by setting selectedParking to null
     setSelectedParking(null);
-  }, []);
+      
+      // If we have a map reference, reset the camera to the current location 
+      // to unfocus from the previously selected parking spot
+      if (mapRef.current && location) {
+        mapRef.current.animateToRegion({
+          latitude: location.latitude,
+          longitude: location.longitude,
+          latitudeDelta: 0.0922,
+          longitudeDelta: 0.0421,
+        }, 500);
+      }
+    }
+  }, [selectedParking, location]);
 
   const handleMapLongPress = useCallback(async (event) => {
     const { coordinate } = event.nativeEvent;
@@ -483,11 +553,173 @@ const handleMapPress = useCallback(() => {
     }
   }, [location]); // Only depend on location
 
+  // Add function to focus on a parking spot with proper positioning
+  const focusOnParkingSpot = useCallback((spot) => {
+    if (!spot || !spot.latitude || !spot.longitude || !mapRef.current) return;
+    
+    // Get dimensions for better positioning
+    const { height } = Dimensions.get('window');
+    
+    // Calculate proper region - move center point upward to account for the ParkingDetails component
+    const region = {
+      latitude: spot.latitude - 0.001, // Offset upward to ensure visibility above the details panel
+      longitude: spot.longitude,
+      latitudeDelta: 0.005, // Zoomed in more than default
+      longitudeDelta: 0.005,
+    };
+    
+    // Animate to the modified region
+    mapRef.current.animateToRegion(region, 500);
+  }, []);
+  
+  // Modify setSelectedParking to focus on the spot after selection
+  const handleParkingSelection = useCallback((spot) => {
+    setSelectedParking(spot);
+    setTimeout(() => focusOnParkingSpot(spot), 100); // Small delay to ensure state updates first
+  }, [focusOnParkingSpot]);
+  
+  // Modify the swipe handlers to also focus on the new spot
+  const handleNextParking = useCallback(() => {
+    if (!filteredParkingSpots || filteredParkingSpots.length === 0 || !selectedParking) {
+      return;
+    }
+    
+    // Sort spots by distance first to maintain consistent order
+    const sortedSpots = [...filteredParkingSpots].sort((a, b) => {
+      if (a.distance && b.distance) {
+        return a.distance - b.distance;
+      }
+      return 0;
+    });
+    
+    // Find current index
+    const currentIndex = sortedSpots.findIndex(spot => spot.id === selectedParking.id);
+    
+    let nextSpot;
+    // If not found or at the end, go to first spot
+    if (currentIndex === -1 || currentIndex === sortedSpots.length - 1) {
+      nextSpot = sortedSpots[0];
+    } else {
+      // Select next spot
+      nextSpot = sortedSpots[currentIndex + 1];
+    }
+    
+    setSelectedParking(nextSpot);
+    focusOnParkingSpot(nextSpot);
+  }, [filteredParkingSpots, selectedParking, focusOnParkingSpot]);
+  
+  const handlePrevParking = useCallback(() => {
+    if (!filteredParkingSpots || filteredParkingSpots.length === 0 || !selectedParking) {
+      return;
+    }
+    
+    // Sort spots by distance first to maintain consistent order
+    const sortedSpots = [...filteredParkingSpots].sort((a, b) => {
+      if (a.distance && b.distance) {
+        return a.distance - b.distance;
+      }
+      return 0;
+    });
+    
+    // Find current index
+    const currentIndex = sortedSpots.findIndex(spot => spot.id === selectedParking.id);
+    
+    let prevSpot;
+    // If not found or at the beginning, go to last spot
+    if (currentIndex === -1 || currentIndex === 0) {
+      prevSpot = sortedSpots[sortedSpots.length - 1];
+    } else {
+      // Select previous spot
+      prevSpot = sortedSpots[currentIndex - 1];
+    }
+    
+    setSelectedParking(prevSpot);
+    focusOnParkingSpot(prevSpot);
+  }, [filteredParkingSpots, selectedParking, focusOnParkingSpot]);
+
+  // Modify handleOpenParkingDetails to use the focus function
+  const handleOpenParkingDetails = useCallback(() => {
+    try {
+      // Debug logging
+      console.log('Running handleOpenParkingDetails');
+      console.log('parkingSpots count:', parkingSpots.length);
+      console.log('filteredParkingSpots count:', filteredParkingSpots.length);
+      
+      // Check if we have any parkingSpots at all
+      if (!parkingSpots || parkingSpots.length === 0) {
+        console.log('No parking spots available');
+        Alert.alert(
+          'No Parking Spots',
+          'No parking spots are available in the database. Please try again later.',
+          [{ text: 'OK' }]
+        );
+        return;
+      }
+      
+      // Make sure we have filtered parking spots with valid data
+      if (!filteredParkingSpots || !Array.isArray(filteredParkingSpots) || filteredParkingSpots.length === 0) {
+        console.log('No filtered parking spots');
+        Alert.alert(
+          'No Parking Spots Nearby',
+          'No parking spots found in this area. Try increasing the search radius or moving to a different location.',
+          [{ text: 'OK' }]
+        );
+        return;
+      }
+      
+      // Sort by distance if available
+      const sortedSpots = [...filteredParkingSpots].sort((a, b) => {
+        if (a.distance && b.distance) {
+          return a.distance - b.distance;
+        }
+        return 0;
+      });
+      
+      console.log('First spot after sorting:', JSON.stringify(sortedSpots[0]));
+      
+      // Ensure the first spot has an id and valid coordinates
+      const firstSpot = sortedSpots[0];
+      if (!firstSpot || !firstSpot.id || !firstSpot.latitude || !firstSpot.longitude) {
+        console.log('Invalid first spot data:', firstSpot);
+        Alert.alert(
+          'Invalid Data',
+          'The parking spot data is incomplete. Please try refreshing the app.',
+          [{ text: 'OK' }]
+        );
+        return;
+      }
+      
+      console.log('Setting selected parking:', firstSpot.id);
+      // Select the closest one
+      setSelectedParking(firstSpot);
+      // Focus the map on this spot with proper positioning
+      focusOnParkingSpot(firstSpot);
+    } catch (error) {
+      console.error('Error selecting parking spot:', error);
+      Alert.alert(
+        'Error',
+        'There was a problem selecting a parking spot. Please try again.',
+        [{ text: 'OK' }]
+      );
+    }
+  }, [filteredParkingSpots, parkingSpots, focusOnParkingSpot]);
+
   // Loading state with minimal UI
   if (errorMsg) {
     return (
       <View style={styles.container}>
+        <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
+        <View style={styles.errorGradient}>
+          <Ionicons name="alert-circle" size={64} color="#ff3b30" />
+          <Text style={styles.errorTitle}>Location Error</Text>
         <Text style={styles.errorText}>{errorMsg}</Text>
+          <TouchableOpacity 
+            style={styles.errorButton}
+            onPress={() => router.replace('/')}
+          >
+            <Text style={styles.errorButtonText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
@@ -495,15 +727,63 @@ const handleMapPress = useCallback(() => {
   if (isLoading || isFetchingParkingData) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
+        <View style={styles.loadingGradient}>
+          <View style={styles.logoContainer}>
+            <Image 
+              source={require('../../../assets/adaptive-icon.png')} 
+              style={styles.logo}
+              resizeMode="contain"
+            />
+          </View>
+          <ActivityIndicator size="large" color="#007AFF" style={styles.loader} />
         <Text style={styles.loadingText}>Finding nearby parking spots...</Text>
+          <Text style={styles.loadingSubText}>We're searching for the best options around you</Text>
+        </View>
       </View>
     );
   }
 
   return (
     <Animated.View style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
+      
+      {/* Map component */}
+      <Map
+        ref={mapRef}
+        location={location}
+        parkingSpots={filteredParkingSpots}
+        searchRadius={searchRadius}
+        onParkingSelected={handleParkingSelection}
+        selectedParking={selectedParking}
+        onMapPress={handleMapPress}
+        onMapLongPress={handleMapLongPress}
+        isCustomLocation={isCustomLocation}
+        onRefreshLocation={handleResetLocation}
+      />
+
+      {/* Error overlay */}
+      {apiError && (
+        <Animated.View 
+          entering={FadeIn.duration(300)}
+          style={styles.errorOverlay}
+        >
+          <View style={styles.errorBlur}>
+            <Ionicons name="warning" size={32} color="#ff9500" />
+            <Text style={styles.errorOverlayText}>{apiError}</Text>
+            <TouchableOpacity 
+              style={styles.errorButton}
+              onPress={refreshParkingSpots}
+            >
+              <Text style={styles.errorButtonText}>Try Again</Text>
+            </TouchableOpacity>
+          </View>
+        </Animated.View>
+      )}
+
+      {/* Search and Location Area */}
       <View style={styles.searchContainer}>
+        <View style={styles.searchBlur}>
         <View style={styles.topBar}>
           <Pressable 
             style={styles.locationButton}
@@ -512,7 +792,6 @@ const handleMapPress = useCallback(() => {
               setSearchQuery('');
               setSearchResults([]);
             }}
-            android_ripple={{ color: 'rgba(0, 122, 255, 0.1)' }}
           >
             <Ionicons 
               name={isCustomLocation ? "location-outline" : "location"} 
@@ -522,6 +801,7 @@ const handleMapPress = useCallback(() => {
             <Text style={styles.locationText} numberOfLines={1}>
               {locationName}
             </Text>
+              <Ionicons name="chevron-down" size={16} color="#007AFF" />
           </Pressable>
           
           <View style={styles.topBarButtons}>
@@ -538,13 +818,13 @@ const handleMapPress = useCallback(() => {
                 )}
               </TouchableOpacity>
             )}
-            
-            <TouchableOpacity
-              style={styles.iconButton}
-              onPress={refreshParkingSpots}
-            >
-              <Ionicons name="refresh" size={22} color="#007AFF" />
-            </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={styles.iconButton}
+                onPress={refreshParkingSpots}
+              >
+                <Ionicons name="refresh" size={22} color="#007AFF" />
+              </TouchableOpacity>
             
             <TouchableOpacity
               style={styles.iconButton}
@@ -567,7 +847,11 @@ const handleMapPress = useCallback(() => {
         </View>
 
         {showSearch && (
-          <View style={styles.searchInputContainer}>
+            <Animated.View 
+              entering={FadeIn.duration(300)}
+              exiting={FadeOut.duration(300)}
+              style={styles.searchInputContainer}
+            >
             <Ionicons name="search" size={20} color="#666" style={styles.searchIcon} />
             <TextInput
               style={styles.searchInput}
@@ -578,6 +862,7 @@ const handleMapPress = useCallback(() => {
                 searchLocations(text);
               }}
               autoFocus
+                placeholderTextColor="#999"
             />
             <TouchableOpacity
               style={styles.closeButton}
@@ -589,12 +874,15 @@ const handleMapPress = useCallback(() => {
             >
               <Ionicons name="close-circle" size={20} color="#666" />
             </TouchableOpacity>
-          </View>
+            </Animated.View>
         )}
 
         {searchResults.length > 0 && (
-          <FlatList
+            <Animated.View
+              entering={FadeIn.duration(300)}
             style={styles.searchResults}
+            >
+              <FlatList
             data={searchResults}
             keyExtractor={(item, index) => index.toString()}
             renderItem={({ item }) => (
@@ -606,16 +894,22 @@ const handleMapPress = useCallback(() => {
                   setSearchQuery('');
                 }}
               >
-                <Ionicons name="location-outline" size={20} color="#666" style={styles.resultIcon} />
+                    <Ionicons name="location-outline" size={20} color="#007AFF" style={styles.resultIcon} />
                 <Text style={styles.searchResultText}>{item.address}</Text>
               </TouchableOpacity>
             )}
           />
+            </Animated.View>
         )}
+        </View>
       </View>
 
       {showFilter && (
-        <View style={styles.radiusContainer}>
+        <Animated.View 
+          entering={FadeIn.duration(300)}
+          style={styles.radiusContainer}
+        >
+          <View style={styles.radiusBlur}>
           <View style={styles.radiusHeader}>
             <Text style={styles.radiusText}>Search Radius: {searchRadius} km</Text>
             <TouchableOpacity
@@ -626,13 +920,14 @@ const handleMapPress = useCallback(() => {
             </TouchableOpacity>
           </View>
           <View style={styles.sliderContainer}>
+              <View style={styles.sliderLabelContainer}>
             <Text style={styles.sliderLabel}>1</Text>
             <Slider
               style={styles.slider}
               minimumValue={1}
               maximumValue={10}
               step={1}
-              value={searchRadius}
+                  value={5}
               onValueChange={setSearchRadius}
               minimumTrackTintColor="#007AFF"
               maximumTrackTintColor="#D3D3D3"
@@ -640,58 +935,44 @@ const handleMapPress = useCallback(() => {
             />
             <Text style={styles.sliderLabel}>10</Text>
           </View>
+              <Text style={styles.radiusHint}>Drag to adjust your search radius</Text>
         </View>
-      )}
-
-      <Map
-        ref={mapRef}
-        location={location}
-        parkingSpots={filteredParkingSpots}
-        searchRadius={searchRadius}
-        onParkingSelected={setSelectedParking}
-        selectedParking={selectedParking}
-        onMapPress={handleMapPress}
-        onMapLongPress={handleMapLongPress}
-        isCustomLocation={isCustomLocation}
-        onRefreshLocation={handleResetLocation}
-      />
-
-      {apiError && (
-        <View style={styles.errorOverlay}>
-          <Text style={styles.errorOverlayText}>{apiError}</Text>
-          <TouchableOpacity 
-            style={styles.errorButton}
-            onPress={refreshParkingSpots}
-          >
-            <Text style={styles.errorButtonText}>Try Again</Text>
-          </TouchableOpacity>
-        </View>
+          </View>
+        </Animated.View>
       )}
       
-      {filteredParkingSpots.length === 0 && !apiError && !isFetchingParkingData && (
-        <View style={styles.errorOverlay}>
-          <Text style={styles.errorOverlayText}>No parking spots found in this area.</Text>
-          <View style={styles.errorButtonsRow}>
-            <TouchableOpacity 
-              style={styles.errorButton}
-              onPress={refreshParkingSpots}
-            >
-              <Text style={styles.errorButtonText}>Refresh Data</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.errorButton}
-              onPress={handleResetLocation}
-            >
-              <Text style={styles.errorButtonText}>Reset Location</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+      {/* Show bottom handle for finding parking spots */}
+      {filteredParkingSpots.length > 0 && selectedParking== null && (
+        <TouchableOpacity 
+          style={styles.bottomSheetHandle}
+          onPress={handleOpenParkingDetails}
+        >
+          <View style={styles.handle} />
+          <Text style={styles.handleText}>
+            {filteredParkingSpots.length} parking spot{filteredParkingSpots.length !== 1 ? 's' : ''} found
+          </Text>
+        </TouchableOpacity>
       )}
 
+      {/* Parking details component */}
       <ParkingDetails
         parking={selectedParking}
-        onBook={() => handlebooking(selectedParking)}
-        onNavigate={() => openMapsNavigation(selectedParking)}
+        onBook={() => {
+          if (selectedParking && selectedParking.id) {
+            handlebooking(selectedParking);
+          } else {
+            Alert.alert('Error', 'Unable to book. Please select a parking spot first.');
+          }
+        }}
+        onNavigate={() => {
+          if (selectedParking && selectedParking.latitude && selectedParking.longitude) {
+            openMapsNavigation(selectedParking);
+          } else {
+            Alert.alert('Error', 'Unable to navigate. Please select a valid parking spot.');
+          }
+        }}
+        onSwipeNext={handleNextParking}
+        onSwipePrev={handlePrevParking}
       />
     </Animated.View>
   );
@@ -704,38 +985,42 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     position: 'absolute',
-    top: 50,
-    left: 10,
-    right: 10,
-    zIndex: 1,
+    top: Platform.OS === 'ios' ? 50 : 40,
+    left: 15,
+    right: 15,
+    zIndex: 5,
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  searchBlur: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
   },
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    borderRadius: 16,
     padding: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
   },
   locationButton: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
-    paddingVertical: 6,
-    paddingHorizontal: 4,
-    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
   },
   topBarButtons: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-    borderRadius: 8,
+    backgroundColor: 'rgba(245, 245, 245, 0.8)',
+    borderRadius: 10,
     padding: 4,
+    marginLeft: 10,
   },
   iconButton: {
     padding: 8,
@@ -746,20 +1031,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
     marginHorizontal: 10,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   searchInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 16,
     marginTop: 8,
     padding: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
   },
   searchIcon: {
     marginRight: 10,
@@ -768,51 +1048,46 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     color: '#333',
-    paddingVertical: 0,
+    paddingVertical: 8,
   },
   closeButton: {
     padding: 4,
   },
   searchResults: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 16,
     marginTop: 5,
     maxHeight: 200,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
   },
   searchResultItem: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: 'rgba(230, 230, 230, 0.7)',
   },
   resultIcon: {
     marginRight: 10,
   },
   searchResultText: {
     flex: 1,
-    fontSize: 14,
+    fontSize: 15,
     color: '#333',
+    fontWeight: '500',
   },
   radiusContainer: {
     position: 'absolute',
-    top: 120,
-    left: 10,
-    right: 10,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-    zIndex: 1,
+    top: Platform.OS === 'ios' ? 130 : 120,
+    left: 15,
+    right: 15,
+    zIndex: 5,
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  radiusBlur: {
+    borderRadius: 16,
+    padding: 15,
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
   },
   radiusHeader: {
     flexDirection: 'row',
@@ -821,7 +1096,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   radiusText: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: 'bold',
     color: '#333',
   },
@@ -829,69 +1104,148 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   sliderContainer: {
+    marginTop: 10,
+  },
+  sliderLabelContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
   sliderLabel: {
     fontSize: 14,
-    color: '#666',
+    color: '#007AFF',
     width: 20,
     textAlign: 'center',
-    fontWeight: '500',
+    fontWeight: '600',
   },
   slider: {
     flex: 1,
     height: 40,
     marginHorizontal: 10,
   },
+  radiusHint: {
+    fontSize: 12,
+    color: '#666',
+    textAlign: 'center',
+    marginTop: 5,
+  },
+  loadingGradient: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#f0f4ff',
+  },
+  logoContainer: {
+    marginBottom: 30,
+  },
+  logo: {
+    width: 120,
+    height: 120,
+  },
+  loader: {
+    marginBottom: 20,
+  },
   loadingText: {
-    marginTop: 10,
-    fontSize: 16,
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  loadingSubText: {
+    fontSize: 14,
     color: '#666',
     textAlign: 'center',
   },
+  errorGradient: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 30,
+    backgroundColor: '#f0f4ff',
+  },
+  errorTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+    marginTop: 20,
+    marginBottom: 10,
+  },
   errorText: {
     fontSize: 16,
-    color: 'red',
+    color: '#666',
     textAlign: 'center',
-    padding: 20,
+    marginBottom: 30,
+    lineHeight: 24,
   },
   errorOverlay: {
     position: 'absolute',
-    bottom: 100,
-    left: 20,
-    right: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: 12,
+    bottom: height * 0.3,
+    left: 30,
+    right: 30,
+    borderRadius: 20,
+    overflow: 'hidden',
+    elevation: 6,
+    zIndex: 6,
+  },
+  errorBlur: {
     padding: 20,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
   },
   errorOverlayText: {
     fontSize: 16,
+    fontWeight: '500',
     color: '#333',
     textAlign: 'center',
-    marginBottom: 15,
+    marginVertical: 15,
   },
   errorButton: {
     backgroundColor: '#007AFF',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
+    paddingHorizontal: 25,
+    paddingVertical: 12,
+    borderRadius: 12,
     marginHorizontal: 5,
+    marginTop: 5,
   },
   errorButtonText: {
     color: '#fff',
     fontWeight: '600',
-    fontSize: 14,
+    fontSize: 16,
   },
   errorButtonsRow: {
     flexDirection: 'row',
     justifyContent: 'center',
+  },
+  bottomSheetHandle: {
+    position: 'absolute',
+    bottom: 20,
+    left: 20,
+    right: 20,
+    backgroundColor: 'white',
+    height: 60,
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+    zIndex: 5,
+  },
+  handle: {
+    width: 40,
+    height: 5,
+    backgroundColor: '#ddd',
+    borderRadius: 3,
+    marginBottom: 8,
+  },
+  handleText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
   },
 });

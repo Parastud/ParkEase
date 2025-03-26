@@ -52,13 +52,10 @@ const About = () => {
           text: "Logout",
           onPress: async () => {
             try {
-              // Sign out from Firebase
               await signOut(auth)
               
-              // Clear the session from AsyncStorage
               await AsyncStorage.removeItem('userSession')
               
-              // Navigate to login screen
               router.replace("/Login")
             } catch (error) {
               console.error("Logout error:", error)
@@ -118,13 +115,13 @@ const About = () => {
 
         <View className="bg-gray-50 rounded-xl p-6">
           <Text className="text-lg font-semibold text-gray-800 mb-2">Contact Support</Text>
-          <Text className="text-gray-600 mb-1">Email: support@parkease.com</Text>
-          <Text className="text-gray-600">Phone: +1 (555) 123-4567</Text>
+          <Text className="text-gray-600 mb-1">Email: test@parkease.com</Text>
+          <Text className="text-gray-600">Phone: +918384810862</Text>
         </View>
 
         <View className="flex-1 justify-end">
           <Text className="text-center text-gray-400 text-sm">
-            © 2023 ParkEase. All rights reserved.
+            © 2025 ParkEase. All rights reserved.
           </Text>
         </View>
       </View>

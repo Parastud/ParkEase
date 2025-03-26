@@ -145,19 +145,37 @@ const convertDocToParkingSpot = (doc) => {
 // Function to fetch all parking spots from Firebase
 export const fetchParkingSpots = async () => {
   try {
+    console.log("Fetching parking spots from Firebase...");
     const querySnapshot = await getDocs(parkingCollectionRef);
     
-    const parkingList = querySnapshot.docs.map(doc => ({
+    // Use sample data if no spots are found
+    if (querySnapshot.empty) {
+      console.log("No parking spots found in Firebase, using sample data");
+      return parkingList;
+    }
+    
+    const parkingSpots = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),
       // Format price to match the app's expected format if needed
       price: typeof doc.data().price === 'number' ? `₹ ${doc.data().price}/hour` : doc.data().price,
     }));
     
-    return parkingList;
+    console.log(`Found ${parkingSpots.length} parking spots in Firebase`);
+    
+    // If we have spots but they're invalid, use sample data
+    if (parkingSpots.length === 0 || !parkingSpots.some(spot => 
+        spot.latitude && spot.longitude && 
+        !isNaN(spot.latitude) && !isNaN(spot.longitude))) {
+      console.log("Retrieved spots are invalid, using sample data instead");
+      return parkingList;
+    }
+    
+    return parkingSpots;
   } catch (error) {
     console.log("Error fetching parking spots:", error.message);
     // Return sample data as fallback
+    console.log("Using sample data due to error");
     return parkingList;
   }
 };
