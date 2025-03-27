@@ -48,7 +48,7 @@ const About = () => {
       // Sign out from Firebase
       await signOut(auth)
       // Navigate after both operations complete
-      router.replace('/(Auth)')
+      router.replace('/Login')
     } catch (error) {
       // Logout error
       setIsLoading(false)

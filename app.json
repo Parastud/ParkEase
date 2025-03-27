@@ -2,7 +2,7 @@
   "expo": {
     "name": "ParkEase",
     "slug": "ParkEase",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "scheme": "ParkEase.com",
     "orientation": "default",
     "icon": "./assets/adaptive-icon.png",
