@@ -4,7 +4,8 @@ import { Link, useLocalSearchParams, useRouter } from 'expo-router'
 import { getParkingSpotById, createBooking, checkExpiredBookings } from '../../../../constants/parkingData'
 import { GlobalState } from '../../../../constants/usecontext'
 import { Redirect } from 'expo-router'
-import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
+import { FontAwesome, MaterialIcons } from 'react-native-vector-icons';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { auth } from '../../../../firebase';
 
@@ -317,7 +318,7 @@ export default function Booking() {
           <View style={styles.modalContent}>
             <View style={styles.header}>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Ionicons name="arrow-back" size={24} color="#333" />
+                <FontAwesome name="arrow-left" size={24} color="#333" />
               </TouchableOpacity>
               <Text style={styles.headerTitle}>Booking Details</Text>
               <View style={{ width: 24 }} />
@@ -351,9 +352,9 @@ export default function Booking() {
                     (parkingSpot.availableSpots === 0 || parkingSpot.spots === 0) ? 
                       styles.unavailableSpotsBadge : {}
                   ]}>
-                    <Ionicons 
+                    <FontAwesome 
                       name={(parkingSpot.availableSpots === 0 || parkingSpot.spots === 0) ? 
-                        "close-circle" : "checkmark-circle"} 
+                        "times-circle" : "check-circle"} 
                       size={16} 
                       color="white" 
                     />
@@ -365,7 +366,7 @@ export default function Booking() {
                   </View>
                   
                   <View style={styles.locationRow}>
-                    <Ionicons name="location" size={18} color="#666" />
+                    <FontAwesome name="map-marker" size={18} color="#666" />
                     <Text style={styles.locationText}>{parkingSpot.description}</Text>
                   </View>
                   
@@ -394,7 +395,7 @@ export default function Booking() {
                       style={styles.dateTimeButton}
                       onPress={() => showDateTimePicker(true)}
                     >
-                      <Ionicons name="time-outline" size={20} color="#007AFF" />
+                      <FontAwesome name="clock-o" size={20} color="#007AFF" />
                       <Text style={styles.dateTimeText}>
                         {startDate.toLocaleString()}
                       </Text>
@@ -405,7 +406,7 @@ export default function Booking() {
                       style={styles.dateTimeButton}
                       onPress={() => showDateTimePicker(false)}
                     >
-                      <Ionicons name="time-outline" size={20} color="#007AFF" />
+                      <FontAwesome name="clock-o" size={20} color="#007AFF" />
                       <Text style={styles.dateTimeText}>
                         {endDate.toLocaleString()}
                       </Text>

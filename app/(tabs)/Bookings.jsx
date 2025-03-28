@@ -8,10 +8,13 @@ import {
   ActivityIndicator,
   Alert,
   RefreshControl,
-  Image
+  Image,
+  Linking,
+  Platform
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
+import { FontAwesome, MaterialIcons } from 'react-native-vector-icons';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { getUserBookings, cancelBooking, checkExpiredBookings } from '../../constants/parkingData';
 import { auth } from '../../firebase';
 import { useRouter, useFocusEffect } from 'expo-router';
@@ -43,6 +46,7 @@ export default function Bookings() {
     try {
       setIsLoading(true);
       setError(null);
+      
       
       if (!auth.currentUser) {
         setError('You must be logged in to view your bookings');
@@ -114,11 +118,26 @@ export default function Bookings() {
     );
   };
 
+  const openMapsNavigation = (latitude, longitude, title) => {
+    const scheme = Platform.select({ ios: 'maps:0,0?q=', android: 'geo:0,0?q=' });
+    const latLng = `${latitude},${longitude}`;
+    const label = title;
+    const url = Platform.select({
+      ios: `${scheme}${label}@${latLng}`,
+      android: `${scheme}${latLng}(${label})`
+    });
+
+    Linking.openURL(url).catch((err) => {
+      Alert.alert('Error', 'Could not open navigation. Please make sure you have a maps app installed.');
+    });
+  };
+
   const renderBookingItem = ({ item }) => {
     const startTime = formatDate(item.startTime);
     const endTime = formatDate(item.endTime);
     const isCancellable = item.status === 'confirmed' || item.status === 'active';
     const isPast = new Date(item.endTime) < new Date();
+    const isActive = item.status === 'active' || (item.status === 'confirmed' && new Date(item.startTime) <= new Date() && new Date(item.endTime) >= new Date());
 
     let displayStatus = item.status === 'active' ? 'ACTIVE' : item.status.toUpperCase();
     if (isPast && (item.status === 'active' || item.status === 'confirmed')) {
@@ -141,14 +160,14 @@ export default function Bookings() {
         </View>
         
         <View style={styles.infoRow}>
-          <Ionicons name="time-outline" size={18} color="#666" />
+          <FontAwesome name="clock-o" size={18} color="#666" />
           <Text style={styles.infoText}>
             From: {startTime}
           </Text>
         </View>
         
         <View style={styles.infoRow}>
-          <Ionicons name="time-outline" size={18} color="#666" />
+          <FontAwesome name="clock-o" size={18} color="#666" />
           <Text style={styles.infoText}>
             To: {endTime}
           </Text>
@@ -170,12 +189,24 @@ export default function Bookings() {
         
         <View style={styles.actionsRow}>
           {isCancellable && !isPast ? (
-            <TouchableOpacity 
-              style={styles.cancelButton}
-              onPress={() => handleCancelBooking(item.id, item.parkingSpotId)}
-            >
-              <Text style={styles.cancelButtonText}>Cancel Booking</Text>
-            </TouchableOpacity>
+            <>
+              <TouchableOpacity 
+                style={styles.cancelButton}
+                onPress={() => handleCancelBooking(item.id, item.parkingSpotId)}
+              >
+                <Text style={styles.cancelButtonText}>Cancel Booking</Text>
+              </TouchableOpacity>
+              
+              {isActive && item.latitude && item.longitude && (
+                <TouchableOpacity
+                  style={styles.navigateButton}
+                  onPress={() => openMapsNavigation(item.latitude, item.longitude, item.parkingSpotTitle)}
+                >
+                  <FontAwesome name="location-arrow" size={16} color="#fff" />
+                  <Text style={styles.navigateButtonText}>Navigate</Text>
+                </TouchableOpacity>
+              )}
+            </>
           ) : isPast && item.status === 'confirmed' ? (
             <View style={styles.completedBadge}>
               <Text style={styles.completedText}>COMPLETED</Text>
@@ -190,7 +221,7 @@ export default function Bookings() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#333" />
+          <FontAwesome name="arrow-left" size={24} color="#333" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>My Bookings</Text>
         <View style={{ width: 24 }} />
@@ -203,7 +234,7 @@ export default function Bookings() {
         </View>
       ) : bookings.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Ionicons name="calendar-outline" size={100} color="#CCCCCC" />
+          <FontAwesome name="calendar-o" size={100} color="#CCCCCC" />
           <Text style={styles.emptyTitle}>No Bookings Found</Text>
           <Text style={styles.emptyText}>You haven't made any parking bookings yet.</Text>
           <TouchableOpacity 
@@ -314,9 +345,10 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   actionsRow: {
-    marginTop: 12,
     flexDirection: 'row',
     justifyContent: 'flex-end',
+    marginTop: 12,
+    alignItems: 'center',
   },
   cancelButton: {
     backgroundColor: '#F44336',
@@ -371,5 +403,22 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  navigateButton: {
+    backgroundColor: '#007AFF',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginLeft: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  navigateButtonText: {
+    color: '#FFF',
+    fontWeight: 'bold',
+    marginLeft: 8,
+  },
+  buttonIcon: {
+    marginRight: 5,
   },
 }); 

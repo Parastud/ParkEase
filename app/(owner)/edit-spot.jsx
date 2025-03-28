@@ -13,7 +13,7 @@ import {
   KeyboardAvoidingView,
   Platform
 } from 'react-native';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { FontAwesome, MaterialIcons } from 'react-native-vector-icons';
 import { 
   getParkingSpotById, 
   updateParkingSpot, 
@@ -378,7 +378,7 @@ export default function EditParkingSpot() {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="#007AFF" />
+            <FontAwesome name="arrow-left" size={24} color="#007AFF" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Edit Parking Spot</Text>
           <View style={{ width: 24 }} />
@@ -430,7 +430,7 @@ export default function EditParkingSpot() {
               onPress={handleCurrentLocation}
               disabled={isLoadingLocation}
             >
-              <Ionicons name="locate" size={20} color="#007AFF" />
+              <FontAwesome name="location-arrow" size={20} color="#007AFF" />
               <Text style={styles.locationButtonText}>
                 {isLoadingLocation ? "Getting location..." : "Use my location"}
               </Text>

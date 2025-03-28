@@ -5,6 +5,7 @@ import { TouchableOpacity, View, Text, ImageBackground, StatusBar } from 'react-
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 import Animated, { FadeIn } from 'react-native-reanimated'
+import { FontAwesome } from 'react-native-vector-icons'
 
 const AuthLayout = () => {
   const [screen, setScreen] = useState(true)
@@ -32,7 +33,7 @@ const AuthLayout = () => {
         >
           <View className="items-center px-6 pt-12">
             <View className="w-20 h-20 bg-white/20 rounded-2xl items-center justify-center mb-4">
-              <Ionicons name="car" size={40} color="#fff" />
+              <FontAwesome name="car" size={40} color="#fff" />
             </View>
             <Text className="text-white text-4xl font-bold">ParkEase</Text>
             <Text className="text-white/80 text-base mt-2">Find parking spots with ease</Text>

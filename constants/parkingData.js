@@ -437,25 +437,39 @@ export const getUserBookings = async () => {
       throw new Error('You must be logged in to view your bookings');
     }
     
-    const userId = auth.currentUser.uid;
-    
-    // Query for bookings made by this user
-    const q = query(bookingsCollectionRef, where("userId", "==", userId));
+    const q = query(bookingsCollectionRef, where("userId", "==", auth.currentUser.uid));
     const querySnapshot = await getDocs(q);
     
-    const bookings = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      // Ensure createdAt is a valid Date for sorting
-      createdAt: doc.data().createdAt ? 
-        (typeof doc.data().createdAt === 'object' && doc.data().createdAt.toDate ? 
-          doc.data().createdAt.toDate() : doc.data().createdAt) 
-        : new Date()
-    }));
+    if (querySnapshot.empty) {
+      return [];
+    }
     
-    return bookings;
+    const bookingsPromises = querySnapshot.docs.map(async (doc) => {
+      const bookingData = { id: doc.id, ...doc.data() };
+      
+      // Fetch the associated parking spot data for location info
+      if (bookingData.parkingSpotId) {
+        try {
+          const parkingSpot = await getParkingSpotById(bookingData.parkingSpotId);
+          if (parkingSpot) {
+            // Add the latitude and longitude from the parking spot to the booking
+            return {
+              ...bookingData,
+              latitude: parkingSpot.latitude,
+              longitude: parkingSpot.longitude
+            };
+          }
+        } catch (error) {
+          console.error("Error fetching parking spot:", error);
+        }
+      }
+      
+      return bookingData;
+    });
+    
+    return Promise.all(bookingsPromises);
   } catch (error) {
-    return [];
+    throw error;
   }
 };
 

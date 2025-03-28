@@ -10,7 +10,7 @@ import {
   Alert,
   RefreshControl
 } from 'react-native';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { FontAwesome, MaterialIcons } from 'react-native-vector-icons';
 import { getParkingSpotsForOwner, deleteParkingSpot, checkIsRegisteredOwner } from '../../constants/parkingData';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { auth } from '../../firebase';
@@ -157,7 +157,7 @@ export default function MyParkingSpots() {
             style={[styles.actionButton, styles.editButton]} 
             onPress={() => handleEdit(item.id)}
           >
-            <Ionicons name="pencil" size={16} color="#fff" />
+            <FontAwesome name="pencil" size={16} color="#fff" />
             <Text style={styles.actionText}>Edit</Text>
           </TouchableOpacity>
           
@@ -165,7 +165,7 @@ export default function MyParkingSpots() {
             style={[styles.actionButton, styles.deleteButton]} 
             onPress={() => confirmDelete(item.id, item.title)}
           >
-            <Ionicons name="trash" size={16} color="#fff" />
+            <FontAwesome name="trash" size={16} color="#fff" />
             <Text style={styles.actionText}>Delete</Text>
           </TouchableOpacity>
         </View>
@@ -186,10 +186,10 @@ export default function MyParkingSpots() {
     <View style={styles.container}>
       <View style={styles.headerButtons}>
         <TouchableOpacity style={styles.refreshButton} onPress={loadParkingSpots}>
-          <Ionicons name="refresh" size={24} color="#007AFF" />
+          <FontAwesome name="refresh" size={24} color="#007AFF" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.addButton} onPress={handleAddNew}>
-          <Ionicons name="add-circle" size={24} color="#007AFF" />
+          <FontAwesome name="plus-circle" size={24} color="#007AFF" />
           <Text style={styles.addButtonText}>Add New</Text>
         </TouchableOpacity>
       </View>

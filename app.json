@@ -42,13 +42,13 @@
     },
     "plugins": [
       "expo-router",
-      
       [
         "expo-location",
         {
           "locationAlwaysAndWhenInUsePermission": "Allow ParkEase to use your location to find nearby parking spots."
         }
-      ]
+      ],
+      "sentry-expo"
     ],
     "extra": {
       "router": {

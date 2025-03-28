@@ -6,7 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { auth } from '../../firebase'
 import { signOut } from 'firebase/auth'
 import { useRouter } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
+import { FontAwesome } from 'react-native-vector-icons'
 import { checkIsRegisteredOwner } from '../../constants/parkingData'
 
 const About = () => {
@@ -75,9 +75,9 @@ const About = () => {
             className="flex-row items-center mb-4 bg-blue-50 p-3 rounded-lg"
             onPress={() => router.push('/(tabs)/Bookings')}
           >
-            <Ionicons name="calendar" size={24} color="#007AFF" />
+            <FontAwesome name="calendar" size={24} color="#007AFF" />
             <Text className="text-blue-600 ml-3 text-base font-medium">My Bookings</Text>
-            <Ionicons name="chevron-forward" size={20} color="#007AFF" style={{ marginLeft: 'auto' }} />
+            <FontAwesome name="chevron-right" size={20} color="#007AFF" style={{ marginLeft: 'auto' }} />
           </TouchableOpacity>
 
           <TouchableOpacity 
@@ -85,18 +85,18 @@ const About = () => {
             onPress={handleOwnerDashboard}
             disabled={isCheckingOwner}
           >
-            <Ionicons name="business" size={24} color="#5856D6" />
+            <FontAwesome name="building" size={24} color="#5856D6" />
             <Text className="text-purple-600 ml-3 text-base font-medium">
               {isCheckingOwner ? "Checking status..." : "Owner Dashboard"}
             </Text>
-            <Ionicons name="chevron-forward" size={20} color="#5856D6" style={{ marginLeft: 'auto' }} />
+            <FontAwesome name="chevron-right" size={20} color="#5856D6" style={{ marginLeft: 'auto' }} />
           </TouchableOpacity>
           
           <TouchableOpacity 
             className="flex-row items-center bg-red-50 p-3 rounded-lg"
             onPress={handleLogout}
           >
-            <Ionicons name="log-out-outline" size={24} color="#FF3B30" />
+            <FontAwesome name="sign-out" size={24} color="#FF3B30" />
             <Text className="text-red-600 ml-3 text-base font-medium">Logout</Text>
           </TouchableOpacity>
         </View>

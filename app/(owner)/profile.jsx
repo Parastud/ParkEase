@@ -12,7 +12,7 @@ import {
   KeyboardAvoidingView,
   Platform
 } from 'react-native';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { FontAwesome, MaterialIcons } from 'react-native-vector-icons';
 import { router } from 'expo-router';
 import { auth, db } from '../../firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
@@ -250,11 +250,11 @@ export default function OwnerProfile() {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="#007AFF" />
+            <FontAwesome name="arrow-left" size={24} color="#007AFF" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>My Profile</Text>
           <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-            <Ionicons name="log-out-outline" size={24} color="#FF3B30" />
+            <FontAwesome name="sign-out" size={24} color="#FF3B30" />
           </TouchableOpacity>
         </View>
 

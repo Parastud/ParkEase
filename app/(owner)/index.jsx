@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome } from 'react-native-vector-icons';
 import { auth } from '../../firebase';
 import { getParkingSpotsForOwner, getOwnerBookings, checkIsRegisteredOwner } from '../../constants/parkingData';
 
@@ -31,11 +31,7 @@ const OwnerDashboard = () => {
       
       const isOwner = await checkIsRegisteredOwner();
       if (!isOwner) {
-        Alert.alert(
-          "Registration Required",
-          "You need to register as a parking spot owner first.",
-          [{ text: "Register Now", onPress: () => router.push('/(owner)/register') }]
-        );
+        router.replace('/Home');
         return;
       }
       
@@ -69,8 +65,8 @@ const OwnerDashboard = () => {
       
       const totalRevenue = bookings
         .filter(booking => booking.status === 'approved' || booking.status === 'completed')
-        .reduce((sum, booking) => sum + (booking.amount || 0), 0);
-      
+        .reduce((sum, booking) => sum + (booking.totalCost || 0), 0);
+
       setStats({
         totalSpots: spots.length,
         totalBookings: bookings.length,
@@ -103,7 +99,7 @@ const OwnerDashboard = () => {
           style={styles.refreshButton}
           onPress={loadOwnerData}
         >
-          <Ionicons name="refresh" size={24} color="#007BFF" />
+          <FontAwesome name="refresh" size={24} color="#007BFF" />
         </TouchableOpacity>
       </View>
       
@@ -136,7 +132,7 @@ const OwnerDashboard = () => {
           style={styles.actionButton}
           onPress={() => router.push('/(owner)/my-spots')}
         >
-          <Ionicons name="car" size={32} color="#007BFF" />
+          <FontAwesome name="car" size={32} color="#007BFF" />
           <Text style={styles.actionText}>Manage Spots</Text>
         </TouchableOpacity>
         
@@ -144,7 +140,7 @@ const OwnerDashboard = () => {
           style={styles.actionButton}
           onPress={() => router.push('/(owner)/booking-requests')}
         >
-          <Ionicons name="calendar" size={32} color="#007BFF" />
+          <FontAwesome name="calendar" size={32} color="#007BFF" />
           <Text style={styles.actionText}>Booking Requests</Text>
         </TouchableOpacity>
         
@@ -152,7 +148,7 @@ const OwnerDashboard = () => {
           style={styles.actionButton}
           onPress={() => router.push('/(owner)/add-spot')}
         >
-          <Ionicons name="add-circle" size={32} color="#007BFF" />
+          <FontAwesome name="plus-circle" size={32} color="#007BFF" />
           <Text style={styles.actionText}>Add New Spot</Text>
         </TouchableOpacity>
         
@@ -160,7 +156,7 @@ const OwnerDashboard = () => {
           style={styles.actionButton}
           onPress={() => router.push('/(owner)/profile')}
         >
-          <Ionicons name="person" size={32} color="#007BFF" />
+          <FontAwesome name="user" size={32} color="#007BFF" />
           <Text style={styles.actionText}>Owner Profile</Text>
         </TouchableOpacity>
       </View>

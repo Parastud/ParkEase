@@ -11,7 +11,8 @@ import {
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { auth } from '../../firebase';
-import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
+import { FontAwesome, MaterialIcons } from 'react-native-vector-icons';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { getOwnerBookings, checkExpiredBookings, approveBooking, rejectBooking, checkIsRegisteredOwner } from '../../constants/parkingData';
 
 export default function BookingRequests() {
@@ -206,21 +207,21 @@ export default function BookingRequests() {
         </View>
         
         <View style={styles.infoRow}>
-          <Ionicons name="person-outline" size={18} color="#666" />
+          <FontAwesome name="user" size={18} color="#666" />
           <Text style={styles.infoText}>
             Booked by: {item.userName || "User"}
           </Text>
         </View>
         
         <View style={styles.infoRow}>
-          <Ionicons name="time-outline" size={18} color="#666" />
+          <FontAwesome name="clock-o" size={18} color="#666" />
           <Text style={styles.infoText}>
             From: {startTime}
           </Text>
         </View>
         
         <View style={styles.infoRow}>
-          <Ionicons name="time-outline" size={18} color="#666" />
+          <FontAwesome name="clock-o" size={18} color="#666" />
           <Text style={styles.infoText}>
             To: {endTime}
           </Text>
@@ -300,7 +301,7 @@ export default function BookingRequests() {
         </View>
       ) : filteredBookings().length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Ionicons name="calendar-outline" size={100} color="#CCCCCC" />
+          <FontAwesome name="calendar-o" size={100} color="#CCCCCC" />
           <Text style={styles.emptyTitle}>No Bookings Found</Text>
           <Text style={styles.emptyText}>
             {filter === 'all' 

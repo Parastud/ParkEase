@@ -5,7 +5,7 @@ import { auth, checkAuthState } from '../../firebase'
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth'
 import { useRouter } from 'expo-router'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { Ionicons } from '@expo/vector-icons'
+import { FontAwesome } from 'react-native-vector-icons'
 
 const { height } = Dimensions.get('window')
 
@@ -24,27 +24,27 @@ const Login = () => {
 
   const checkExistingSession = async () => {
     try {
-      // First check Firebase auth state
+
       const user = await checkAuthState();
       if (user) {
         router.replace("/Home");
         return;
       }
       
-      // If no Firebase auth, check local storage as fallback
+
       const userSession = await AsyncStorage.getItem('userSession');
       if (userSession) {
         const session = JSON.parse(userSession);
-        // Check if the session is still valid (e.g., not expired)
+
         const lastLogin = new Date(session.lastLogin);
         const now = new Date();
         const hoursDiff = (now - lastLogin) / (1000 * 60 * 60);
         
-        // If session is less than 24 hours old, redirect to home
+
         if (hoursDiff < 24) {
           router.replace("/Home");
         } else {
-          // Clear expired session
+
           await AsyncStorage.removeItem('userSession');
         }
       }
@@ -65,7 +65,7 @@ const Login = () => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password)
       
-      // Save session data if rememberMe is enabled
+
       if (rememberMe) {
         await AsyncStorage.setItem('userSession', JSON.stringify({
           uid: userCredential.user.uid,
@@ -140,10 +140,10 @@ const Login = () => {
     try {
       setIsLoading(true);
       
-      // This is just a placeholder for now
-      // We'll implement proper Google Sign In when the native modules issue is resolved
+
+
       setTimeout(() => {
-        // For testing purposes, let's just show an alert
+
         Alert.alert("Google Sign In", "Google Sign In will be implemented in the production version.");
         setIsLoading(false);
       }, 1500);
@@ -184,16 +184,16 @@ const Login = () => {
         >
           <Text className="text-gray-700 mb-2 font-medium">Email</Text>
           <View className="flex-row items-center border border-gray-300 rounded-xl px-4 bg-gray-50">
-            <Ionicons name="mail-outline" size={20} color="#6b7280" />
-            <TextInput
+            <FontAwesome name="envelope" size={20} color="#6b7280" />
+        <TextInput
               placeholder="Your email address"
-              value={email}
-              onChangeText={setEmail}
+          value={email}
+          onChangeText={setEmail}
               className="flex-1 py-3 px-2"
               placeholderTextColor="#9ca3af"
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
           </View>
         </Animated.View>
         
@@ -203,20 +203,20 @@ const Login = () => {
         >
           <Text className="text-gray-700 mb-2 font-medium">Password</Text>
           <View className="flex-row items-center border border-gray-300 rounded-xl px-4 bg-gray-50">
-            <Ionicons name="lock-closed-outline" size={20} color="#6b7280" />
-            <TextInput
+            <FontAwesome name="lock" size={20} color="#6b7280" />
+        <TextInput
               placeholder="Your password"
-              value={password}
-              onChangeText={setPassword}
+          value={password}
+          onChangeText={setPassword}
               className="flex-1 py-3 px-2"
               placeholderTextColor="#9ca3af"
               secureTextEntry={!showPassword}
             />
             <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-              <Ionicons 
-                name={showPassword ? "eye-off-outline" : "eye-outline"} 
-                size={20} 
-                color="#6b7280" 
+              <FontAwesome
+                name={showPassword ? "eye-slash" : "eye"}
+                size={20}
+                color="#6b7280"
               />
             </TouchableOpacity>
           </View>
@@ -231,7 +231,7 @@ const Login = () => {
             onPress={() => setRememberMe(!rememberMe)}
           >
             <View className={`w-5 h-5 flex items-center justify-center rounded mr-2 ${rememberMe ? 'bg-blue-500' : 'border border-gray-300'}`}>
-              {rememberMe && <Ionicons name="checkmark" size={14} color="#fff" />}
+              {rememberMe && <FontAwesome name="check" size={14} color="#fff" />}
             </View>
             <Text className="text-gray-600">Remember me</Text>
           </TouchableOpacity>
@@ -271,10 +271,10 @@ const Login = () => {
             onPress={handleGoogleSignIn}
             disabled={isLoading}
           >
-            <Ionicons name="logo-google" size={20} color="#EA4335" />
-          </TouchableOpacity>
-        </View>
-      </Animated.View>
+            <FontAwesome name="google" size={20} color="#EA4335" />
+        </TouchableOpacity>
+      </View>
+    </Animated.View>
     </View>
   )
 }

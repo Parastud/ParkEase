@@ -16,7 +16,7 @@ import {
   Alert
 } from 'react-native';
 import * as Location from 'expo-location';
-import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
+import { FontAwesome, MaterialIcons, FontAwesome5 } from 'react-native-vector-icons';
 import Slider from '@react-native-community/slider';
 import Map from '../../../components/Map';
 import ParkingDetails from '../../../components/ParkingDetails';
@@ -673,6 +673,7 @@ changeScreenOrientation();
 
       // Set this spot as selected
       setSelectedParking(firstSpot);
+      focusOnParkingSpot(firstSpot);
 
     } catch (error) {
       Alert.alert("Error", "There was a problem selecting a parking spot. Please try again.");
@@ -685,7 +686,7 @@ changeScreenOrientation();
       <View style={styles.container}>
         <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
         <View style={styles.errorGradient}>
-          <Ionicons name="alert-circle" size={64} color="#ff3b30" />
+          <FontAwesome name="exclamation-circle" size={64} color="#ff3b30" />
           <Text style={styles.errorTitle}>Location Error</Text>
         <Text style={styles.errorText}>{errorMsg}</Text>
           <TouchableOpacity 
@@ -744,7 +745,7 @@ changeScreenOrientation();
           style={styles.errorOverlay}
         >
           <View style={styles.errorBlur}>
-            <Ionicons name="warning" size={32} color="#ff9500" />
+            <FontAwesome name="warning" size={32} color="#ff9500" />
             <Text style={styles.errorOverlayText}>{apiError}</Text>
             <TouchableOpacity 
               style={styles.errorButton}
@@ -768,15 +769,15 @@ changeScreenOrientation();
               setSearchResults([]);
             }}
           >
-            <Ionicons 
-              name={isCustomLocation ? "location-outline" : "location"} 
+            <FontAwesome 
+              name={isCustomLocation ? "map-marker" : "map-marker"} 
               size={24} 
               color="#007AFF" 
             />
             <Text style={styles.locationText} numberOfLines={1}>
               {locationName}
             </Text>
-              <Ionicons name="chevron-down" size={16} color="#007AFF" />
+              <FontAwesome name="chevron-down" size={16} color="#007AFF" />
           </Pressable>
           
           <View style={styles.topBarButtons}>
@@ -789,7 +790,7 @@ changeScreenOrientation();
                 {isResettingLocation ? (
                   <ActivityIndicator size="small" color="#007AFF" />
                 ) : (
-                  <Ionicons name="home" size={22} color="#007AFF" />
+                  <FontAwesome name="home" size={22} color="#007AFF" />
                 )}
               </TouchableOpacity>
             )}
@@ -798,7 +799,7 @@ changeScreenOrientation();
                 style={styles.iconButton}
                 onPress={refreshParkingSpots}
               >
-                <Ionicons name="refresh" size={22} color="#007AFF" />
+                <FontAwesome name="refresh" size={22} color="#007AFF" />
               </TouchableOpacity>
             
             <TouchableOpacity
@@ -809,14 +810,14 @@ changeScreenOrientation();
                 setSearchResults([]);
               }}
             >
-              <Ionicons name="search" size={22} color="#007AFF" />
+              <FontAwesome name="search" size={22} color="#007AFF" />
             </TouchableOpacity>
             
             <TouchableOpacity
               style={styles.iconButton}
               onPress={() => setShowFilter(!showFilter)}
             >
-              <Ionicons name="options" size={22} color="#007AFF" />
+              <FontAwesome name="sliders" size={22} color="#007AFF" />
             </TouchableOpacity>
           </View>
         </View>
@@ -827,7 +828,7 @@ changeScreenOrientation();
               exiting={FadeOut.duration(300)}
               style={styles.searchInputContainer}
             >
-            <Ionicons name="search" size={20} color="#666" style={styles.searchIcon} />
+            <FontAwesome name="search" size={20} color="#666" style={styles.searchIcon} />
             <TextInput
               style={styles.searchInput}
               placeholder="Search for a location..."
@@ -847,7 +848,7 @@ changeScreenOrientation();
                 setSearchResults([]);
               }}
             >
-              <Ionicons name="close-circle" size={20} color="#666" />
+              <FontAwesome name="times-circle" size={20} color="#666" />
             </TouchableOpacity>
             </Animated.View>
         )}
@@ -869,7 +870,7 @@ changeScreenOrientation();
                   setSearchQuery('');
                 }}
               >
-                    <Ionicons name="location-outline" size={20} color="#007AFF" style={styles.resultIcon} />
+                    <FontAwesome name="map-marker" size={20} color="#007AFF" style={styles.resultIcon} />
                 <Text style={styles.searchResultText}>{item.address}</Text>
               </TouchableOpacity>
             )}
@@ -891,7 +892,7 @@ changeScreenOrientation();
               style={styles.closeFilterButton}
               onPress={() => setShowFilter(false)}
             >
-              <Ionicons name="close" size={20} color="#666" />
+              <FontAwesome name="times" size={20} color="#666" />
             </TouchableOpacity>
           </View>
           <View style={styles.sliderContainer}>
