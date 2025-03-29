@@ -1,7 +1,6 @@
 import React, { useCallback, memo, useMemo } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Platform, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { FontAwesome } from 'react-native-vector-icons';
 import Animated, { 
   SlideInDown, 
   SlideOutDown, 
@@ -23,13 +22,13 @@ const { width } = Dimensions.get('window');
 
 // Pre-create stable icons once for the entire application lifecycle
 const icons = {
-  car: <FontAwesome name="car" size={18} color="#007AFF" />,
-  location: <FontAwesome name="map-marker" size={18} color="#007AFF" />,
-  time: <FontAwesome name="clock-o" size={18} color="#007AFF" />,
-  star: <FontAwesome name="star" size={16} color="#FFD700" />,
-  navigate: <FontAwesome name="location-arrow" size={20} color="#007AFF" />,
-  chevronForward: <FontAwesome name="chevron-right" size={24} color="#007AFF" />,
-  chevronBack: <FontAwesome name="chevron-left" size={24} color="#007AFF" />
+  car: <Ionicons name="car" size={18} color="#007AFF" />,
+  location: <Ionicons name="location" size={18} color="#007AFF" />,
+  time: <Ionicons name="time" size={18} color="#007AFF" />,
+  star: <Ionicons name="star" size={16} color="#FFD700" />,
+  navigate: <Ionicons name="navigate" size={20} color="#007AFF" />,
+  chevronForward: <Ionicons name="chevron-forward" size={24} color="#007AFF" />,
+  chevronBack: <Ionicons name="chevron-back" size={24} color="#007AFF" />
 };
 
 // Move styles outside component to prevent recreation

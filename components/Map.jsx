@@ -1,7 +1,7 @@
 import React, { forwardRef, useEffect, useRef, useCallback } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Dimensions, Platform, ActivityIndicator } from 'react-native';
 import MapView, { Marker, Circle, PROVIDER_GOOGLE, Callout } from 'react-native-maps';
-import { FontAwesome } from 'react-native-vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 
 const { width, height } = Dimensions.get('window');
 
@@ -100,7 +100,7 @@ const Map = forwardRef(({
               styles.parkingMarker,
               selectedParking?.id === spot.id && styles.selectedParkingMarker
             ]}>
-              <FontAwesome 
+              <Ionicons 
                 name="car" 
                 size={16} 
                 color={selectedParking?.id === spot.id ? '#ffffff' : '#007AFF'} 
@@ -113,7 +113,7 @@ const Map = forwardRef(({
         style={styles.myLocationButton}
         onPress={onRefreshLocation}
       >
-        <FontAwesome name="location-arrow" size={24} color="#007AFF" />
+        <Ionicons name="location-arrow" size={24} color="#007AFF" />
       </TouchableOpacity>
     </View>
   );

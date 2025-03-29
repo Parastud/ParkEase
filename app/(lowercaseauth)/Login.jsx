@@ -5,7 +5,7 @@ import { auth, checkAuthState } from '../../firebase'
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth'
 import { useRouter } from 'expo-router'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { FontAwesome } from 'react-native-vector-icons'
+import { MaterialIcons } from '@expo/vector-icons'
 
 const { height } = Dimensions.get('window')
 
@@ -184,7 +184,7 @@ const Login = () => {
         >
           <Text className="text-gray-700 mb-2 font-medium">Email</Text>
           <View className="flex-row items-center border border-gray-300 rounded-xl px-4 bg-gray-50">
-            <FontAwesome name="envelope" size={20} color="#6b7280" />
+            <MaterialIcons name="email" size={20} color="#6b7280" />
         <TextInput
               placeholder="Your email address"
           value={email}
@@ -203,7 +203,7 @@ const Login = () => {
         >
           <Text className="text-gray-700 mb-2 font-medium">Password</Text>
           <View className="flex-row items-center border border-gray-300 rounded-xl px-4 bg-gray-50">
-            <FontAwesome name="lock" size={20} color="#6b7280" />
+            <MaterialIcons name="lock" size={20} color="#6b7280" />
         <TextInput
               placeholder="Your password"
           value={password}
@@ -213,8 +213,8 @@ const Login = () => {
               secureTextEntry={!showPassword}
             />
             <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-              <FontAwesome
-                name={showPassword ? "eye-slash" : "eye"}
+              <MaterialIcons
+                name={showPassword ? "visibility-off" : "visibility"}
                 size={20}
                 color="#6b7280"
               />
@@ -231,7 +231,7 @@ const Login = () => {
             onPress={() => setRememberMe(!rememberMe)}
           >
             <View className={`w-5 h-5 flex items-center justify-center rounded mr-2 ${rememberMe ? 'bg-blue-500' : 'border border-gray-300'}`}>
-              {rememberMe && <FontAwesome name="check" size={14} color="#fff" />}
+              {rememberMe && <MaterialIcons name="check" size={14} color="#fff" />}
             </View>
             <Text className="text-gray-600">Remember me</Text>
           </TouchableOpacity>
@@ -271,7 +271,7 @@ const Login = () => {
             onPress={handleGoogleSignIn}
             disabled={isLoading}
           >
-            <FontAwesome name="google" size={20} color="#EA4335" />
+            <MaterialIcons name="google" size={20} color="#EA4335" />
         </TouchableOpacity>
       </View>
     </Animated.View>

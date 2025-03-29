@@ -13,8 +13,7 @@ import {
   Platform
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { FontAwesome, MaterialIcons } from 'react-native-vector-icons';
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import { Ionicons } from '@expo/vector-icons';
 import { getUserBookings, cancelBooking, checkExpiredBookings } from '../../constants/parkingData';
 import { auth } from '../../firebase';
 import { useRouter, useFocusEffect } from 'expo-router';
@@ -160,28 +159,28 @@ export default function Bookings() {
         </View>
         
         <View style={styles.infoRow}>
-          <FontAwesome name="clock-o" size={18} color="#666" />
+          <Ionicons name="clock-outline" size={18} color="#666" />
           <Text style={styles.infoText}>
             From: {startTime}
           </Text>
         </View>
         
         <View style={styles.infoRow}>
-          <FontAwesome name="clock-o" size={18} color="#666" />
+          <Ionicons name="clock-outline" size={18} color="#666" />
           <Text style={styles.infoText}>
             To: {endTime}
           </Text>
         </View>
         
         <View style={styles.infoRow}>
-          <FontAwesome5 name="money-bill-wave" size={16} color="#666" />
+          <Ionicons name="cash-outline" size={16} color="#666" />
           <Text style={styles.infoText}>
             Total Cost: Rs{item.totalCost.toFixed(2)}
           </Text>
         </View>
         
         <View style={styles.infoRow}>
-          <MaterialIcons name="schedule" size={18} color="#666" />
+          <Ionicons name="time-outline" size={18} color="#666" />
           <Text style={styles.infoText}>
             Duration: {item.duration} hour(s)
           </Text>
@@ -202,7 +201,7 @@ export default function Bookings() {
                   style={styles.navigateButton}
                   onPress={() => openMapsNavigation(item.latitude, item.longitude, item.parkingSpotTitle)}
                 >
-                  <FontAwesome name="location-arrow" size={16} color="#fff" />
+                  <Ionicons name="location-outline" size={16} color="#fff" />
                   <Text style={styles.navigateButtonText}>Navigate</Text>
                 </TouchableOpacity>
               )}
@@ -221,7 +220,7 @@ export default function Bookings() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <FontAwesome name="arrow-left" size={24} color="#333" />
+          <Ionicons name="arrow-back" size={24} color="#333" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>My Bookings</Text>
         <View style={{ width: 24 }} />
@@ -234,7 +233,7 @@ export default function Bookings() {
         </View>
       ) : bookings.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <FontAwesome name="calendar-o" size={100} color="#CCCCCC" />
+          <Ionicons name="calendar-outline" size={100} color="#CCCCCC" />
           <Text style={styles.emptyTitle}>No Bookings Found</Text>
           <Text style={styles.emptyText}>You haven't made any parking bookings yet.</Text>
           <TouchableOpacity 
