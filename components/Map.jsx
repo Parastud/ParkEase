@@ -1,7 +1,7 @@
 import React, { forwardRef, useEffect, useRef, useCallback } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Dimensions, Platform, ActivityIndicator } from 'react-native';
 import MapView, { Marker, Circle, PROVIDER_GOOGLE, Callout } from 'react-native-maps';
-import { Ionicons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 
 const { width, height } = Dimensions.get('window');
 
@@ -53,8 +53,8 @@ const Map = forwardRef(({
         initialRegion={{
           latitude: location.latitude,
           longitude: location.longitude,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
+          latitudeDelta: searchRadius * 0.1, // Adjust zoom level based on radius
+          longitudeDelta: searchRadius * 0.1,
         }}
         onPress={onMapPress}
         onLongPress={onMapLongPress}
@@ -80,9 +80,9 @@ const Map = forwardRef(({
             longitude: location.longitude,
           }}
           radius={searchRadius * 1000} // Convert km to meters
-          strokeWidth={1}
-          strokeColor="rgba(0, 122, 255, 0.3)"
-          fillColor="rgba(0, 122, 255, 0.1)"
+          strokeWidth={2}
+          strokeColor="rgba(0, 122, 255, 0.5)"
+          fillColor="rgba(0, 122, 255, 0.15)"
         />
         {validSpots.map((spot, index) => (
           <Marker
@@ -100,8 +100,8 @@ const Map = forwardRef(({
               styles.parkingMarker,
               selectedParking?.id === spot.id && styles.selectedParkingMarker
             ]}>
-              <Ionicons 
-                name="car" 
+              <MaterialIcons 
+                name="local-parking" 
                 size={16} 
                 color={selectedParking?.id === spot.id ? '#ffffff' : '#007AFF'} 
               />
@@ -113,7 +113,7 @@ const Map = forwardRef(({
         style={styles.myLocationButton}
         onPress={onRefreshLocation}
       >
-        <Ionicons name="location-arrow" size={24} color="#007AFF" />
+        <MaterialIcons name="my-location" size={24} color="#007AFF" />
       </TouchableOpacity>
     </View>
   );

@@ -1,12 +1,13 @@
-import { StyleSheet, Text, View, TouchableOpacity, Alert } from 'react-native'
-import React, { useState } from 'react'
-import { SafeAreaView } from 'react-native'
-import Animated from 'react-native-reanimated'
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import React, { useState, useEffect, useCallback } from 'react'
+import { View, Text, StyleSheet, Switch, TouchableOpacity, Image, Alert, ActivityIndicator } from 'react-native'
+import { LinearGradient } from 'expo-linear-gradient'
+import { BlurView } from 'expo-blur'
+import { router } from 'expo-router'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { StatusBar } from 'expo-status-bar'
+import { MaterialIcons } from '@expo/vector-icons'
+import { signOut, updateProfile } from 'firebase/auth'
 import { auth } from '../../firebase'
-import { signOut } from 'firebase/auth'
-import { useRouter } from 'expo-router'
-import { FontAwesome } from 'react-native-vector-icons'
 import { checkIsRegisteredOwner } from '../../constants/parkingData'
 
 const About = () => {
@@ -36,21 +37,16 @@ const About = () => {
         router.push('/(owner)/register')
       }
     } catch (error) {
-      // Error checking owner status
     }
   }
 
   const handleLogout = async () => {
     setIsLoading(true)
     try {
-      // Clear local storage to prevent state inconsistency
       await AsyncStorage.removeItem('userSession')
-      // Sign out from Firebase
       await signOut(auth)
-      // Navigate after both operations complete
       router.replace('/Login')
     } catch (error) {
-      // Logout error
       setIsLoading(false)
     }
   }
@@ -71,33 +67,33 @@ const About = () => {
         <View className="bg-gray-50 rounded-xl p-6 mb-8">
           <Text className="text-lg font-semibold text-gray-800 mb-4">Account Options</Text>
           
-          <TouchableOpacity 
-            className="flex-row items-center mb-4 bg-blue-50 p-3 rounded-lg"
+          <TouchableOpacity
+            style={styles.menuItem}
             onPress={() => router.push('/(tabs)/Bookings')}
           >
-            <FontAwesome name="calendar" size={24} color="#007AFF" />
-            <Text className="text-blue-600 ml-3 text-base font-medium">My Bookings</Text>
-            <FontAwesome name="chevron-right" size={20} color="#007AFF" style={{ marginLeft: 'auto' }} />
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            className="flex-row items-center mb-4 bg-purple-50 p-3 rounded-lg"
-            onPress={handleOwnerDashboard}
-            disabled={isCheckingOwner}
-          >
-            <FontAwesome name="building" size={24} color="#5856D6" />
-            <Text className="text-purple-600 ml-3 text-base font-medium">
-              {isCheckingOwner ? "Checking status..." : "Owner Dashboard"}
-            </Text>
-            <FontAwesome name="chevron-right" size={20} color="#5856D6" style={{ marginLeft: 'auto' }} />
+            <MaterialIcons name="calendar-today" size={24} color="#007AFF" />
+            <Text style={styles.menuItemText}>Manage Bookings</Text>
+            <MaterialIcons name="arrow-forward-ios" size={20} color="#007AFF" style={{ marginLeft: 'auto' }} />
           </TouchableOpacity>
           
           <TouchableOpacity 
-            className="flex-row items-center bg-red-50 p-3 rounded-lg"
+            style={styles.menuItem}
+            onPress={handleOwnerDashboard}
+            disabled={isCheckingOwner}
+          >
+            <MaterialIcons name="business" size={24} color="#5856D6" />
+            <Text style={styles.menuItemText}>
+              {isCheckingOwner ? "Checking status..." : "Parking Owner Dashboard"}
+            </Text>
+            <MaterialIcons name="arrow-forward-ios" size={20} color="#5856D6" style={{ marginLeft: 'auto' }} />
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={styles.menuItem}
             onPress={handleLogout}
           >
-            <FontAwesome name="sign-out" size={24} color="#FF3B30" />
-            <Text className="text-red-600 ml-3 text-base font-medium">Logout</Text>
+            <MaterialIcons name="logout" size={24} color="#FF3B30" />
+            <Text style={[styles.menuItemText, styles.signOut]}>Sign Out</Text>
           </TouchableOpacity>
         </View>
 

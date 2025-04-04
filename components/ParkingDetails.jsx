@@ -1,6 +1,6 @@
 import React, { useCallback, memo, useMemo } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Platform, Dimensions } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import Animated, { 
   SlideInDown, 
   SlideOutDown, 
@@ -20,16 +20,16 @@ import { useAnimatedGestureHandler } from 'react-native-reanimated';
 
 const { width } = Dimensions.get('window');
 
-// Pre-create stable icons once for the entire application lifecycle
-const icons = {
-  car: <Ionicons name="car" size={18} color="#007AFF" />,
-  location: <Ionicons name="location" size={18} color="#007AFF" />,
-  time: <Ionicons name="time" size={18} color="#007AFF" />,
-  star: <Ionicons name="star" size={16} color="#FFD700" />,
-  navigate: <Ionicons name="navigate" size={20} color="#007AFF" />,
-  chevronForward: <Ionicons name="chevron-forward" size={24} color="#007AFF" />,
-  chevronBack: <Ionicons name="chevron-back" size={24} color="#007AFF" />
-};
+// Icons for better UI
+const icons = useMemo(() => ({
+  car: <MaterialIcons name="directions-car" size={18} color="#007AFF" />,
+  location: <MaterialIcons name="location-on" size={18} color="#007AFF" />,
+  time: <MaterialIcons name="access-time" size={18} color="#007AFF" />,
+  star: <MaterialIcons name="star" size={16} color="#FFD700" />,
+  navigate: <MaterialIcons name="navigation" size={20} color="#007AFF" />,
+  chevronForward: <MaterialIcons name="arrow-forward-ios" size={24} color="#007AFF" />,
+  chevronBack: <MaterialIcons name="arrow-back-ios" size={24} color="#007AFF" />
+}), []);
 
 // Move styles outside component to prevent recreation
 const styles = StyleSheet.create({
