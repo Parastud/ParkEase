@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Dimensions, FlatList } from 'react-native';
-import { FontAwesome } from 'react-native-vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import Animated, { 
   useAnimatedStyle, 
   useSharedValue, 
@@ -110,13 +110,13 @@ const ModalSwipe = ({ parkingSpots, onSelectParking, location, currentSelected }
         </View>
         <View style={styles.parkingDetails}>
           <View style={styles.detailRow}>
-            <FontAwesome name="map-marker" size={16} color="#666" />
+            <MaterialIcons name="location-on" size={16} color="#666" />
             <Text style={styles.detailText}>
               {item.distance ? `${item.distance.toFixed(1)} km away` : 'Distance unknown'}
             </Text>
           </View>
           <View style={styles.detailRow}>
-            <FontAwesome name="car" size={16} color="#666" />
+            <MaterialIcons name="local-parking" size={16} color="#666" />
             <Text style={styles.detailText}>
               {item.availableSpots} spots available
             </Text>

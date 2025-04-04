@@ -5,7 +5,7 @@ import { auth, checkAuthState } from '../../firebase'
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth'
 import { useRouter } from 'expo-router'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { FontAwesome } from 'react-native-vector-icons'
+import { FontAwesome } from '@expo/vector-icons'
 
 const { height } = Dimensions.get('window')
 
@@ -271,7 +271,7 @@ const Login = () => {
             onPress={handleGoogleSignIn}
             disabled={isLoading}
           >
-            <FontAwesome name="google" size={20} color="#EA4335" />
+            <FontAwesome name="google" size={40} color="#EA4335" />
         </TouchableOpacity>
       </View>
     </Animated.View>

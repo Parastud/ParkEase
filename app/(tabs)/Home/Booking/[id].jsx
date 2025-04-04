@@ -15,35 +15,30 @@ export default function Booking() {
   const {modalVisible, setModalVisible, setRefreshBookings} = useContext(GlobalState);
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
-  
-  // New state variables for booking
   const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date(Date.now() + 2 * 60 * 60 * 1000)); // 2 hours from now
+  const [endDate, setEndDate] = useState(new Date(Date.now() + 2 * 60 * 60 * 1000));
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
   const [totalCost, setTotalCost] = useState(0);
-  const [pickerMode, setPickerMode] = useState('date'); // 'date' or 'time'
-  const [tempDate, setTempDate] = useState(new Date()); // For Android two-step picker
-  const [isStartDatePicker, setIsStartDatePicker] = useState(true); // To track which picker is active
+  const [pickerMode, setPickerMode] = useState('date');
+  const [tempDate, setTempDate] = useState(new Date());
+  const [isStartDatePicker, setIsStartDatePicker] = useState(true);
   
   useEffect(() => {
     const fetchParkingSpot = async () => {
       setIsLoading(true);
       try {
-        // Check for any expired bookings first to ensure spot availability is accurate
         await checkExpiredBookings();
         
         const fetchedSpot = await getParkingSpotById(id);
         if (fetchedSpot) {
           setParkingSpot(fetchedSpot);
         } else {
-          // Handle case when parking spot isn't found
           Alert.alert("Error", "Parking spot not found", [
             { text: "OK", onPress: () => router.push('/Home') }
           ]);
         }
       } catch (error) {
-        // Handle error
         Alert.alert("Error", "Failed to load parking spot details", [
           { text: "OK", onPress: () => router.push('/Home') }
         ]);
@@ -56,31 +51,24 @@ export default function Booking() {
       fetchParkingSpot();
     }
   }, [id]);
-  
-  // Calculate total cost when dates change
   useEffect(() => {
     if (parkingSpot) {
       const hourDiff = Math.max(1, Math.ceil((endDate - startDate) / (1000 * 60 * 60)));
       let price = 0;
       
       if (typeof parkingSpot.price === 'string') {
-        // Extract numeric value from string like "₹ 150/hour" or number
         const extractPriceValue = (priceString) => {
           if (typeof priceString === 'number') return priceString;
-          
-          // If it's a string, extract the numeric part using regex
           const matches = priceString.match(/₹\s*(\d+(\.\d+)?)/);
           if (matches && matches[1]) {
             return parseFloat(matches[1]);
           }
-          
-          // Fallback to old format "Rs 150/hour"
           const oldMatches = priceString.match(/Rs\s*(\d+(\.\d+)?)/);
           if (oldMatches && oldMatches[1]) {
             return parseFloat(oldMatches[1]);
           }
           
-          return 0; // Default if no valid price found
+          return 0;
         };
         
         price = extractPriceValue(parkingSpot.price);
@@ -91,12 +79,9 @@ export default function Booking() {
       setTotalCost(hourDiff * price);
     }
   }, [startDate, endDate, parkingSpot]);
-  
-  // Handle showing the date/time picker based on platform
   const showDateTimePicker = (isStart) => {
     setIsStartDatePicker(isStart);
     if (Platform.OS === 'android') {
-      // On Android, we'll show the date picker first
       setPickerMode('date');
       setTempDate(isStart ? startDate : endDate);
     }
@@ -107,11 +92,8 @@ export default function Booking() {
       setShowEndPicker(true);
     }
   };
-  
-  // Handler for date/time selection
   const onDateTimeChange = (event, selectedDate) => {
     if (event.type === 'dismissed') {
-      // User canceled
       setShowStartPicker(false);
       setShowEndPicker(false);
       return;
@@ -119,29 +101,23 @@ export default function Booking() {
     
     if (selectedDate) {
       if (Platform.OS === 'android') {
-        // On Android, we need a two-step process
         if (pickerMode === 'date') {
-          // Save the date and show time picker
           const newDate = new Date(selectedDate);
           setTempDate(newDate);
           setPickerMode('time');
-          return; // Don't hide the picker yet
+          return;
         } else {
-          // We have both date and time now
           const combinedDate = new Date(tempDate);
           combinedDate.setHours(selectedDate.getHours());
           combinedDate.setMinutes(selectedDate.getMinutes());
           
           if (isStartDatePicker) {
-            // Validate and set start date
             setStartDate(combinedDate);
-            // Adjust end date if needed
             if (endDate < combinedDate) {
               const newEndDate = new Date(combinedDate.getTime() + 2 * 60 * 60 * 1000);
               setEndDate(newEndDate);
             }
           } else {
-            // Validate and set end date
             if (combinedDate > startDate) {
               setEndDate(combinedDate);
             } else {
@@ -152,7 +128,6 @@ export default function Booking() {
           }
         }
       } else {
-        // On iOS, we can set the date directly
         if (isStartDatePicker) {
           setStartDate(selectedDate);
           if (endDate < selectedDate) {
@@ -170,14 +145,11 @@ export default function Booking() {
         }
       }
     }
-    
-    // Hide the picker
     setShowStartPicker(false);
     setShowEndPicker(false);
   };
   
   const handleBooking = async () => {
-    // Check if user is logged in
     if (!auth.currentUser) {
       Alert.alert(
         "Login Required",
@@ -192,8 +164,7 @@ export default function Booking() {
       );
       return;
     }
-    
-    // Check if there are available spots
+
     const availableSpots = parkingSpot.availableSpots || parkingSpot.spots || 0;
     if (availableSpots <= 0) {
       Alert.alert("No Spots Available", "Sorry, there are no parking spots available at this location.");
@@ -219,43 +190,33 @@ export default function Booking() {
   const handleBookingConfirm = async () => {
     try {
       setIsLoading(true);
-      
-      // Create booking data
       const bookingData = {
         parkingSpotId: parkingSpot.id,
         parkingSpotTitle: parkingSpot.title,
         startTime: startDate.toISOString(),
         endTime: endDate.toISOString(),
         totalCost: totalCost,
-        duration: Math.ceil((endDate - startDate) / (1000 * 60 * 60)), // Duration in hours
-        paymentStatus: 'paid', // For simplicity, assume payment is done,
-        userId: auth.currentUser.uid, // Add the user ID
-        userName: auth.currentUser.displayName || auth.currentUser.email || 'User', // Add user name
-        status: 'confirmed' // Set initial status
+        duration: Math.ceil((endDate - startDate) / (1000 * 60 * 60)),
+        paymentStatus: 'paid',
+        userId: auth.currentUser.uid, 
+        userName: auth.currentUser.displayName || auth.currentUser.email || 'User', 
+        status: 'confirmed' 
       };
-      
-      // Save booking to Firebase
       const newBooking = await createBooking(bookingData);
       
-      // Signal that bookings should be refreshed
       if (setRefreshBookings) {
         setRefreshBookings(true);
       }
       
-      // Close modal first - this is important to prevent it from reappearing
       setModalVisible(false);
       setIsLoading(false);
-      
-      // Slight delay before navigation to ensure modal is closed
       setTimeout(() => {
-        // Show success message
         Alert.alert(
           "Booking Confirmed", 
           "Your parking spot has been successfully booked! View your booking details now.",
           [{ 
             text: "View Bookings", 
             onPress: () => {
-              // Navigate directly to Bookings tab
               router.push("/(tabs)/Bookings");
             }
           }]
@@ -266,14 +227,10 @@ export default function Booking() {
       Alert.alert("Booking Failed", error.message || "There was an error creating your booking. Please try again.");
     }
   };
-
-  // Add a useEffect that runs when the modalVisible state changes
   useEffect(() => {
-    // When the modal becomes visible, refresh the parking spot data
     if (modalVisible && id) {
       const refreshSpotData = async () => {
         try {
-          // Check for expired bookings first to ensure availability is up-to-date
           await checkExpiredBookings();
           
           const freshSpotData = await getParkingSpotById(id);
@@ -281,7 +238,6 @@ export default function Booking() {
             setParkingSpot(freshSpotData);
           }
         } catch (error) {
-          // Error handling
         }
       };
       

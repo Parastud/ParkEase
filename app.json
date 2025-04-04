@@ -49,11 +49,8 @@
       [
         "expo-font",
         {
-          "extensions": [
-            ".ttf"
-          ],
-          "assets": [
-            "./node_modules/react-native-vector-icons/Fonts"
+          "fonts": [
+            "./node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/MaterialIcons.ttf"
           ]
         }
       ],
@@ -72,8 +69,7 @@
       },
       "eas": {
         "projectId": "4116df7f-cd50-44c4-822c-54da485efdd5"
-      },
-      "fonts": ["./assets/fonts/FontAwesome.ttf"]
+      }
     }
   }
 }

@@ -16,7 +16,7 @@ import {
   Alert
 } from 'react-native';
 import * as Location from 'expo-location';
-import { FontAwesome, MaterialIcons, FontAwesome5 } from 'react-native-vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import Slider from '@react-native-community/slider';
 import Map from '../../../components/Map';
 import ParkingDetails from '../../../components/ParkingDetails';
@@ -24,7 +24,6 @@ import { FIXED_PARKING_SPOTS, fetchParkingSpots, getParkingSpotById, checkExpire
 import "../../../global.css";
 import { GlobalState } from '../../../constants/usecontext';
 import { router } from 'expo-router';
-import * as ScreenOrientation from 'expo-screen-orientation';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import ModalSwipe from '../../../components/ModalSwipe';
 import { auth } from '../../../firebase';
@@ -69,60 +68,45 @@ export default function Home() {
   const [isFetchingParkingData, setIsFetchingParkingData] = useState(true);
   const [apiError, setApiError] = useState(null);
   const parkingSpotsRef = useRef([]);
-  
-  // Update ref whenever parkingSpots changes
   useEffect(() => {
     parkingSpotsRef.current = parkingSpots;
   }, [parkingSpots]);
-
   useEffect(() => {
-
-    async function changeScreenOrientation() {
-  await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.ALL);
-}
-changeScreenOrientation();
-  }, []);
-
-  // Fetch parking spots from Firebase
+    if (mapRef.current && location) {
+      mapRef.current.animateToRegion({
+        latitude: location.latitude,
+        longitude: location.longitude,
+        latitudeDelta: searchRadius * 0.1,
+        longitudeDelta: searchRadius * 0.1,
+      }, 500);
+    }
+  }, [searchRadius, location]);
   useEffect(() => {
     const loadParkingSpots = async () => {
       setIsFetchingParkingData(true);
       try {
-        // Skip expired bookings check if not authenticated
         if (auth?.currentUser) {
-          // Check for expired bookings first
           await checkExpiredBookings();
         }
-        
-        // Then get the latest data
         const spotsFromFirebase = await fetchParkingSpots();
-        
-        // If no spots were loaded, show error
         if (!spotsFromFirebase || spotsFromFirebase.length === 0) {
           setApiError('No parking spots found in the database');
           setParkingSpots([]);
           setIsFetchingParkingData(false);
           return;
         }
-        
-        // Process spots to ensure they have the right format
         const processedSpots = spotsFromFirebase.map(spot => {
-          // Extract coordinates from Firebase's location format if needed
           let latitude = spot.latitude;
           let longitude = spot.longitude;
           
-          // Check if coordinates are in Firebase's location.coordinates format
           if ((!latitude || !longitude) && spot.location?.coordinates) {
-            // Firebase stores as [longitude, latitude]
             longitude = spot.location.coordinates[0];
             latitude = spot.location.coordinates[1];
           }
           
-          // Ensure coordinates are valid numbers
           latitude = typeof latitude === 'string' ? parseFloat(latitude) : latitude;
           longitude = typeof longitude === 'string' ? parseFloat(longitude) : longitude;
-          
-          // Format price for display
+
           let price = spot.price;
           if (typeof price === 'number') {
             price = `₹ ${price}/hour`;
@@ -133,20 +117,16 @@ changeScreenOrientation();
             latitude,
             longitude,
             price,
-            // Ensure these are properly formatted for display
             totalSpots: spot.totalSpots || 0,
             availableSpots: spot.availableSpots || 0,
-            // Make sure we have a title
             title: spot.title || 'Parking Spot'
           };
         }).filter(spot => {
-          // Filter out spots with invalid coordinates
           const isValid = spot.latitude && spot.longitude && 
             !isNaN(spot.latitude) && !isNaN(spot.longitude);
           return isValid;
         });
         
-        // If we have a location, calculate distances
         if (location) {
           const spotsWithDistances = processedSpots.map(spot => ({
             ...spot,
@@ -164,7 +144,6 @@ changeScreenOrientation();
       } catch (error) {
         console.error("Error loading parking spots:", error.message);
         setApiError('Failed to load parking spots from Firebase');
-        // Set empty array instead of using static data
         setParkingSpots([]);
       } finally {
         setIsFetchingParkingData(false);
@@ -172,12 +151,11 @@ changeScreenOrientation();
     };
 
     loadParkingSpots();
-  }, [location]); // Reload when location changes
+  }, [location]); 
 
   const updateParkingSpots = useCallback((newLocation) => {
     if (!newLocation) return;
     
-    // Update distances for existing parking spots using the ref instead of state
     const spotsWithDistances = parkingSpotsRef.current.map(spot => ({
       ...spot,
       distance: getDistance(
@@ -188,11 +166,10 @@ changeScreenOrientation();
       )
     }));
     setParkingSpots(spotsWithDistances);
-  }, []); // Empty dependency array to avoid recreation
+  }, []);
 
   const handlebooking = useCallback((parking) => {
     try {
-      // Validate parking object
       if (!parking) {
         Alert.alert(
           "Error",
@@ -201,7 +178,6 @@ changeScreenOrientation();
         return;
       }
       
-      // Check if parking ID exists
       if (!parking.id) {
         Alert.alert(
           "Error",
@@ -210,7 +186,6 @@ changeScreenOrientation();
         return;
       }
       
-      // Check if parking has available spots
       if (!parking.availableSpots || parking.availableSpots <= 0) {
         Alert.alert(
           "Sorry",
@@ -219,7 +194,6 @@ changeScreenOrientation();
         return;
       }
       
-      // If all validations pass, proceed with booking
       setModalVisible(true);
       router.push(`/(tabs)/Home/Booking/${parking.id}`);
     } catch (error) {
@@ -273,8 +247,8 @@ changeScreenOrientation();
       } finally {
         setIsSearching(false);
       }
-    }, 500); // 500ms debounce
-  }, []); // Empty dependency array as it doesn't depend on component state
+    }, 500);
+  }, []);
 
   const handleLocationSelect = useCallback(async (selectedLocation) => {
     const newLocation = {
@@ -309,25 +283,20 @@ changeScreenOrientation();
   const handleResetLocation = useCallback(async () => {
     setIsResettingLocation(true);
     if (location) {
-      // Use current location but mark as "Your Location" immediately
       setLocationName('Your Location');
       setIsCustomLocation(false);
-      
-      // If we have parking spots already, filter them based on current location
       if (parkingSpots.length > 0) {
         const currentFiltered = parkingSpots.filter(spot => 
           spot.distance <= searchRadius
         );
-        // Update UI with current filtered spots
         setSelectedParking(null);
         setSearchResults([]);
       }
     }
     
     try {
-      // Get actual current location in background
       const { coords } = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Low // Use low accuracy for faster results
+        accuracy: Location.Accuracy.Low 
       });
       
       const newLocation = {
@@ -336,8 +305,6 @@ changeScreenOrientation();
         latitudeDelta: 0.0922,
         longitudeDelta: 0.0421,
       };
-      
-      // Update with actual current location
       setLocation(newLocation);
       updateParkingSpots(newLocation);
     } catch (error) {
@@ -346,15 +313,9 @@ changeScreenOrientation();
       setIsResettingLocation(false);
     }
   }, [location, parkingSpots, searchRadius, updateParkingSpots]);
-
-  // Modify handleMapPress to properly close parking details and remove focus
   const handleMapPress = useCallback(() => {
     if (selectedParking) {
-      // Close the parking details by setting selectedParking to null
     setSelectedParking(null);
-      
-      // If we have a map reference, reset the camera to the current location 
-      // to unfocus from the previously selected parking spot
       if (mapRef.current && location) {
         mapRef.current.animateToRegion({
           latitude: location.latitude,
@@ -403,7 +364,6 @@ changeScreenOrientation();
     
     const getInitialLocation = async () => {
       try {
-        // Request permissions first
         let { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
           if (isMounted) {
@@ -412,8 +372,6 @@ changeScreenOrientation();
           }
           return;
         }
-
-        // Get last known location first for immediate display
         let lastKnownLocation = await Location.getLastKnownPositionAsync();
         
         if (lastKnownLocation && isMounted) {
@@ -427,8 +385,6 @@ changeScreenOrientation();
           updateParkingSpots(quickLocation);
           setIsLoading(false);
         }
-        
-        // Then get current location for accuracy
         let currentLocation = await Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.Balanced
         });
@@ -463,8 +419,6 @@ changeScreenOrientation();
       }
     };
   }, [updateParkingSpots]);
-
-  // Map animation effect
   useEffect(() => {
     if (mapRef.current && location) {
       mapRef.current.animateToRegion({
@@ -474,43 +428,28 @@ changeScreenOrientation();
         longitudeDelta: 0.0421,
       }, 1000);
     }
-  }, [location]); // Keep only location as dependency
-
-  // Memoize filtered parking spots to prevent recalculation on every render
+  }, [location]); 
   const filteredParkingSpots = useMemo(() => {
     const filtered = parkingSpots.filter(spot => spot.distance <= searchRadius);
     return filtered.map(spot => ({
       ...spot,
-      // Ensure coordinates are proper numbers
       latitude: typeof spot.latitude === 'string' ? parseFloat(spot.latitude) : spot.latitude,
       longitude: typeof spot.longitude === 'string' ? parseFloat(spot.longitude) : spot.longitude
     }));
   }, [parkingSpots, searchRadius]);
-
-  // Add a manual refresh function
   const refreshParkingSpots = useCallback(async () => {
     setIsFetchingParkingData(true);
     try {
       const spotsFromFirebase = await fetchParkingSpots();
-      
-      // Process spots to ensure they have the right format
       const processedSpots = spotsFromFirebase.map(spot => {
-        // Extract coordinates from Firebase's location format if needed
         let latitude = spot.latitude;
         let longitude = spot.longitude;
-        
-        // Check if coordinates are in Firebase's location.coordinates format
         if ((!latitude || !longitude) && spot.location?.coordinates) {
-          // Firebase stores as [longitude, latitude]
           longitude = spot.location.coordinates[0];
           latitude = spot.location.coordinates[1];
         }
-        
-        // Ensure coordinates are valid numbers
         latitude = typeof latitude === 'string' ? parseFloat(latitude) : latitude;
         longitude = typeof longitude === 'string' ? parseFloat(longitude) : longitude;
-        
-        // Format price for display
         let price = spot.price;
         if (typeof price === 'number') {
           price = `₹ ${price}/hour`;
@@ -526,13 +465,10 @@ changeScreenOrientation();
           title: spot.title || 'Parking Spot'
         };
       }).filter(spot => {
-        // Filter out spots with invalid coordinates
         const isValid = spot.latitude && spot.longitude && 
           !isNaN(spot.latitude) && !isNaN(spot.longitude);
         return isValid;
       });
-      
-      // If we have a location, calculate distances
       if (location) {
         const spotsWithDistances = processedSpots.map(spot => ({
           ...spot,
@@ -554,40 +490,31 @@ changeScreenOrientation();
     } finally {
       setIsFetchingParkingData(false);
     }
-  }, [location]); // Only depend on location
-
-  // Add function to focus on a parking spot with proper positioning
+  }, [location]); 
   const focusOnParkingSpot = useCallback((spot) => {
     if (!spot || !spot.latitude || !spot.longitude || !mapRef.current) return;
-    
-    // Get dimensions for better positioning
     const { height } = Dimensions.get('window');
     
-    // Calculate proper region - move center point upward to account for the ParkingDetails component
     const region = {
-      latitude: spot.latitude - 0.001, // Offset upward to ensure visibility above the details panel
+      latitude: spot.latitude - 0.001, 
       longitude: spot.longitude,
-      latitudeDelta: 0.005, // Zoomed in more than default
+      latitudeDelta: 0.005,
       longitudeDelta: 0.005,
     };
-    
-    // Animate to the modified region
+  
     mapRef.current.animateToRegion(region, 500);
   }, []);
   
-  // Modify setSelectedParking to focus on the spot after selection
   const handleParkingSelection = useCallback((spot) => {
     setSelectedParking(spot);
-    setTimeout(() => focusOnParkingSpot(spot), 100); // Small delay to ensure state updates first
+    setTimeout(() => focusOnParkingSpot(spot), 100);
   }, [focusOnParkingSpot]);
   
-  // Modify the swipe handlers to also focus on the new spot
   const handleNextParking = useCallback(() => {
     if (!filteredParkingSpots || filteredParkingSpots.length === 0 || !selectedParking) {
       return;
     }
     
-    // Sort spots by distance first to maintain consistent order
     const sortedSpots = [...filteredParkingSpots].sort((a, b) => {
       if (a.distance && b.distance) {
         return a.distance - b.distance;
@@ -595,15 +522,12 @@ changeScreenOrientation();
       return 0;
     });
     
-    // Find current index
     const currentIndex = sortedSpots.findIndex(spot => spot.id === selectedParking.id);
     
     let nextSpot;
-    // If not found or at the end, go to first spot
     if (currentIndex === -1 || currentIndex === sortedSpots.length - 1) {
       nextSpot = sortedSpots[0];
     } else {
-      // Select next spot
       nextSpot = sortedSpots[currentIndex + 1];
     }
     
@@ -615,24 +539,18 @@ changeScreenOrientation();
     if (!filteredParkingSpots || filteredParkingSpots.length === 0 || !selectedParking) {
       return;
     }
-    
-    // Sort spots by distance first to maintain consistent order
     const sortedSpots = [...filteredParkingSpots].sort((a, b) => {
       if (a.distance && b.distance) {
         return a.distance - b.distance;
       }
       return 0;
     });
-    
-    // Find current index
     const currentIndex = sortedSpots.findIndex(spot => spot.id === selectedParking.id);
     
     let prevSpot;
-    // If not found or at the beginning, go to last spot
     if (currentIndex === -1 || currentIndex === 0) {
       prevSpot = sortedSpots[sortedSpots.length - 1];
     } else {
-      // Select previous spot
       prevSpot = sortedSpots[currentIndex - 1];
     }
     
@@ -686,7 +604,7 @@ changeScreenOrientation();
       <View style={styles.container}>
         <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
         <View style={styles.errorGradient}>
-          <FontAwesome name="exclamation-circle" size={64} color="#ff3b30" />
+          <MaterialIcons name="error" size={64} color="#ff3b30" />
           <Text style={styles.errorTitle}>Location Error</Text>
         <Text style={styles.errorText}>{errorMsg}</Text>
           <TouchableOpacity 
@@ -723,8 +641,6 @@ changeScreenOrientation();
   return (
     <Animated.View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
-      
-      {/* Map component */}
       <Map
         ref={mapRef}
         location={location}
@@ -737,15 +653,13 @@ changeScreenOrientation();
         isCustomLocation={isCustomLocation}
         onRefreshLocation={handleResetLocation}
       />
-
-      {/* Error overlay */}
       {apiError && (
         <Animated.View 
           entering={FadeIn.duration(300)}
           style={styles.errorOverlay}
         >
           <View style={styles.errorBlur}>
-            <FontAwesome name="warning" size={32} color="#ff9500" />
+            <MaterialIcons name="warning" size={32} color="#ff9500" />
             <Text style={styles.errorOverlayText}>{apiError}</Text>
             <TouchableOpacity 
               style={styles.errorButton}
@@ -769,15 +683,15 @@ changeScreenOrientation();
               setSearchResults([]);
             }}
           >
-            <FontAwesome 
-              name={isCustomLocation ? "map-marker" : "map-marker"} 
+            <MaterialIcons 
+              name={isCustomLocation ? "location-on" : "location-on"} 
               size={24} 
               color="#007AFF" 
             />
             <Text style={styles.locationText} numberOfLines={1}>
               {locationName}
             </Text>
-              <FontAwesome name="chevron-down" size={16} color="#007AFF" />
+            <MaterialIcons name="keyboard-arrow-down" size={16} color="#007AFF" />
           </Pressable>
           
           <View style={styles.topBarButtons}>
@@ -790,7 +704,7 @@ changeScreenOrientation();
                 {isResettingLocation ? (
                   <ActivityIndicator size="small" color="#007AFF" />
                 ) : (
-                  <FontAwesome name="home" size={22} color="#007AFF" />
+                  <MaterialIcons name="home" size={22} color="#007AFF" />
                 )}
               </TouchableOpacity>
             )}
@@ -799,7 +713,7 @@ changeScreenOrientation();
                 style={styles.iconButton}
                 onPress={refreshParkingSpots}
               >
-                <FontAwesome name="refresh" size={22} color="#007AFF" />
+                <MaterialIcons name="refresh" size={22} color="#007AFF" />
               </TouchableOpacity>
             
             <TouchableOpacity
@@ -810,14 +724,14 @@ changeScreenOrientation();
                 setSearchResults([]);
               }}
             >
-              <FontAwesome name="search" size={22} color="#007AFF" />
+              <MaterialIcons name="search" size={22} color="#007AFF" />
             </TouchableOpacity>
             
             <TouchableOpacity
               style={styles.iconButton}
               onPress={() => setShowFilter(!showFilter)}
             >
-              <FontAwesome name="sliders" size={22} color="#007AFF" />
+              <MaterialIcons name="tune" size={22} color="#007AFF" />
             </TouchableOpacity>
           </View>
         </View>
@@ -828,7 +742,7 @@ changeScreenOrientation();
               exiting={FadeOut.duration(300)}
               style={styles.searchInputContainer}
             >
-            <FontAwesome name="search" size={20} color="#666" style={styles.searchIcon} />
+            <MaterialIcons name="search" size={20} color="#666" style={styles.searchIcon} />
             <TextInput
               style={styles.searchInput}
               placeholder="Search for a location..."
@@ -848,7 +762,7 @@ changeScreenOrientation();
                 setSearchResults([]);
               }}
             >
-              <FontAwesome name="times-circle" size={20} color="#666" />
+              <MaterialIcons name="close" size={20} color="#666" />
             </TouchableOpacity>
             </Animated.View>
         )}
@@ -870,7 +784,7 @@ changeScreenOrientation();
                   setSearchQuery('');
                 }}
               >
-                    <FontAwesome name="map-marker" size={20} color="#007AFF" style={styles.resultIcon} />
+                    <MaterialIcons name="location-on" size={20} color="#007AFF" style={styles.resultIcon} />
                 <Text style={styles.searchResultText}>{item.address}</Text>
               </TouchableOpacity>
             )}
@@ -892,7 +806,7 @@ changeScreenOrientation();
               style={styles.closeFilterButton}
               onPress={() => setShowFilter(false)}
             >
-              <FontAwesome name="times" size={20} color="#666" />
+              <MaterialIcons name="close" size={20} color="#666" />
             </TouchableOpacity>
           </View>
           <View style={styles.sliderContainer}>
