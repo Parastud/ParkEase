@@ -3,7 +3,6 @@ import { auth } from '../firebase';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getAuth } from 'firebase/auth';
 
-// Initialize Firestore using the existing auth instance
 const db = getFirestore();
 const storage = getStorage();
 
@@ -12,15 +11,6 @@ const parkingCollectionRef = collection(db, 'parkingSpots');
 const parkingOwnersCollectionRef = collection(db, 'parkingOwners');
 const bookingsCollectionRef = collection(db, 'bookings');
 const notificationsCollectionRef = collection(db, 'notifications');
-
-// Initialize collections if they don't exist (Firestore creates collections on first document)
-// We'll create collections automatically when data is first added
-// const initializeCollections = async () => {
-//   try {
-//     // Code removed to prevent permission errors
-//   } catch (error) {
-//   }
-// };
 
 // Call initialization function only if user is logged in
 auth.onAuthStateChanged((user) => {

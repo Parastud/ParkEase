@@ -276,7 +276,7 @@ const Register = () => {
               className="w-12 h-12 rounded-full bg-gray-100 items-center justify-center border border-gray-200"
               onPress={() => Alert.alert("Coming Soon", "Google registration will be available in the production version.")}
             >
-              <MaterialIcons name="logo-google" size={20} color="#EA4335" />
+              <FontAwesome name="google" size={40} color="#EA4335" />
             </TouchableOpacity>
           </View>
     </Animated.View>

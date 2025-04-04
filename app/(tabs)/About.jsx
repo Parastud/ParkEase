@@ -1,14 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react'
-import { View, Text, StyleSheet, Switch, TouchableOpacity, Image, Alert, ActivityIndicator } from 'react-native'
-import { LinearGradient } from 'expo-linear-gradient'
-import { BlurView } from 'expo-blur'
-import { router } from 'expo-router'
+import React, { useState } from 'react'
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native'
+import { useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { StatusBar } from 'expo-status-bar'
-import { MaterialIcons } from '@expo/vector-icons'
-import { signOut, updateProfile } from 'firebase/auth'
+import { FontAwesome } from '@expo/vector-icons'
+import { signOut } from 'firebase/auth'
 import { auth } from '../../firebase'
 import { checkIsRegisteredOwner } from '../../constants/parkingData'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const About = () => {
   const router = useRouter()
@@ -41,15 +39,27 @@ const About = () => {
   }
 
   const handleLogout = async () => {
-    setIsLoading(true)
-    try {
-      await AsyncStorage.removeItem('userSession')
-      await signOut(auth)
-      router.replace('/Login')
-    } catch (error) {
-      setIsLoading(false)
-    }
-  }
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      { text: "Cancel", style: "cancel" },
+      { 
+        text: "Logout", 
+        style: "destructive", 
+        onPress: async () => {
+          setIsLoading(true);
+          try {
+            await AsyncStorage.removeItem('userSession');
+            await signOut(auth);
+            router.replace('/Login');
+          } catch (error) {
+            console.log(error);
+          } finally {
+            setIsLoading(false);
+          }
+        }
+      }
+    ]);
+  };
+  
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -71,9 +81,8 @@ const About = () => {
             style={styles.menuItem}
             onPress={() => router.push('/(tabs)/Bookings')}
           >
-            <MaterialIcons name="calendar-today" size={24} color="#007AFF" />
+            <FontAwesome name="calendar" size={24} color="#007AFF" />
             <Text style={styles.menuItemText}>Manage Bookings</Text>
-            <MaterialIcons name="arrow-forward-ios" size={20} color="#007AFF" style={{ marginLeft: 'auto' }} />
           </TouchableOpacity>
           
           <TouchableOpacity 
@@ -81,18 +90,17 @@ const About = () => {
             onPress={handleOwnerDashboard}
             disabled={isCheckingOwner}
           >
-            <MaterialIcons name="business" size={24} color="#5856D6" />
+            <FontAwesome name="building" size={24} color="#5856D6" />
             <Text style={styles.menuItemText}>
               {isCheckingOwner ? "Checking status..." : "Parking Owner Dashboard"}
             </Text>
-            <MaterialIcons name="arrow-forward-ios" size={20} color="#5856D6" style={{ marginLeft: 'auto' }} />
           </TouchableOpacity>
           
           <TouchableOpacity
             style={styles.menuItem}
             onPress={handleLogout}
           >
-            <MaterialIcons name="logout" size={24} color="#FF3B30" />
+            <FontAwesome name="sign-out" size={24} color="#FF3B30" />
             <Text style={[styles.menuItemText, styles.signOut]}>Sign Out</Text>
           </TouchableOpacity>
         </View>
@@ -115,4 +123,20 @@ const About = () => {
 
 export default About
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  menuItemText: {
+    fontSize: 16,
+    marginLeft: 12,
+    color: '#374151',
+  },
+  signOut: {
+    color: '#FF3B30',
+  }
+})

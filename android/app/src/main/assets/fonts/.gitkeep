@@ -1,0 +1,2 @@
+# This file ensures the fonts directory exists
+# Font files will be copied here during build 

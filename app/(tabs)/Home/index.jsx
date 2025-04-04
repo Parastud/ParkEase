@@ -20,12 +20,11 @@ import { MaterialIcons } from '@expo/vector-icons';
 import Slider from '@react-native-community/slider';
 import Map from '../../../components/Map';
 import ParkingDetails from '../../../components/ParkingDetails';
-import { FIXED_PARKING_SPOTS, fetchParkingSpots, getParkingSpotById, checkExpiredBookings } from '../../../constants/parkingData';
+import { fetchParkingSpots, checkExpiredBookings } from '../../../constants/parkingData';
 import "../../../global.css";
 import { GlobalState } from '../../../constants/usecontext';
 import { router } from 'expo-router';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
-import ModalSwipe from '../../../components/ModalSwipe';
 import { auth } from '../../../firebase';
 
 const { height, width } = Dimensions.get('window');
@@ -68,9 +67,11 @@ export default function Home() {
   const [isFetchingParkingData, setIsFetchingParkingData] = useState(true);
   const [apiError, setApiError] = useState(null);
   const parkingSpotsRef = useRef([]);
+
   useEffect(() => {
     parkingSpotsRef.current = parkingSpots;
   }, [parkingSpots]);
+
   useEffect(() => {
     if (mapRef.current && location) {
       mapRef.current.animateToRegion({
@@ -81,6 +82,7 @@ export default function Home() {
       }, 500);
     }
   }, [searchRadius, location]);
+
   useEffect(() => {
     const loadParkingSpots = async () => {
       setIsFetchingParkingData(true);
@@ -313,9 +315,10 @@ export default function Home() {
       setIsResettingLocation(false);
     }
   }, [location, parkingSpots, searchRadius, updateParkingSpots]);
+
   const handleMapPress = useCallback(() => {
     if (selectedParking) {
-    setSelectedParking(null);
+      setSelectedParking(null);
       if (mapRef.current && location) {
         mapRef.current.animateToRegion({
           latitude: location.latitude,
@@ -325,7 +328,7 @@ export default function Home() {
         }, 500);
       }
     }
-  }, [selectedParking, location]);
+  }, [selectedParking, location, mapRef]);
 
   const handleMapLongPress = useCallback(async (event) => {
     const { coordinate } = event.nativeEvent;
@@ -359,6 +362,7 @@ export default function Home() {
       setLocationName('Selected Location');
     }
   }, [updateParkingSpots]);
+
   useEffect(() => {
     let isMounted = true;
     
@@ -419,6 +423,7 @@ export default function Home() {
       }
     };
   }, [updateParkingSpots]);
+  
   useEffect(() => {
     if (mapRef.current && location) {
       mapRef.current.animateToRegion({
@@ -490,7 +495,7 @@ export default function Home() {
     } finally {
       setIsFetchingParkingData(false);
     }
-  }, [location]); 
+  }, [location]);
   const focusOnParkingSpot = useCallback((spot) => {
     if (!spot || !spot.latitude || !spot.longitude || !mapRef.current) return;
     const { height } = Dimensions.get('window');
@@ -596,7 +601,7 @@ export default function Home() {
     } catch (error) {
       Alert.alert("Error", "There was a problem selecting a parking spot. Please try again.");
     }
-  }, [parkingSpots, searchRadius]);
+  }, [parkingSpots, searchRadius, focusOnParkingSpot]);
 
   // Loading state with minimal UI
   if (errorMsg) {
@@ -671,7 +676,6 @@ export default function Home() {
         </Animated.View>
       )}
 
-      {/* Search and Location Area */}
       <View style={styles.searchContainer}>
         <View style={styles.searchBlur}>
         <View style={styles.topBar}>
@@ -817,7 +821,7 @@ export default function Home() {
               minimumValue={1}
               maximumValue={10}
               step={1}
-                  value={5}
+              value={5}
               onValueChange={setSearchRadius}
               minimumTrackTintColor="#007AFF"
               maximumTrackTintColor="#D3D3D3"
