@@ -4,7 +4,7 @@ import { Link, useLocalSearchParams, useRouter } from 'expo-router'
 import { getParkingSpotById, createBooking, checkExpiredBookings } from '../../../../constants/parkingData'
 import { GlobalState } from '../../../../constants/usecontext'
 import { Redirect } from 'expo-router'
-import { FontAwesome, MaterialIcons } from 'react-native-vector-icons';
+import { FontAwesome } from 'react-native-vector-icons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { auth } from '../../../../firebase';
@@ -334,7 +334,7 @@ export default function Booking() {
                       </Text>
                     </View>
                     <View style={styles.detailItem}>
-                      <MaterialIcons name="security" size={18} color="#007AFF" />
+                      <FontAwesome name="shield" size={18} color="#007AFF" />
                       <Text style={styles.detailText}>24/7 Security</Text>
                     </View>
                   </View>

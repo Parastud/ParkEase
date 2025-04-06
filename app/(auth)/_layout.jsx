@@ -5,8 +5,6 @@ import { TouchableOpacity, View, Text, ImageBackground, StatusBar } from 'react-
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { FontAwesome } from '@expo/vector-icons'
 import Animated, { FadeIn } from 'react-native-reanimated'
-import { Stack } from 'expo-router'
-import { BlurView } from 'expo-blur'
 
 const AuthLayout = () => {
   const [screen, setScreen] = useState(true)
@@ -19,13 +17,12 @@ const AuthLayout = () => {
     <View className="flex-1">
       <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
       <ImageBackground
-        source={require('../../assets/test.jpg')}
+        source={require('../../assets/car.jpg')}
         className="absolute w-full h-full -top-1/2"
         resizeMode="cover"
       >
         <View className="absolute w-full h-full bg-black/50" />
         <View className="absolute left-0 right-0 bottom-8 flex-row justify-center">
-          <FontAwesome name="car" size={40} color="#fff" />
         </View>
       </ImageBackground>
       

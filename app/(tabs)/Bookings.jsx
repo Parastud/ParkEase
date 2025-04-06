@@ -13,7 +13,7 @@ import {
   Platform
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { MaterialIcons } from '@expo/vector-icons';
+import { FontAwesome } from '@expo/vector-icons';
 import { getUserBookings, cancelBooking, checkExpiredBookings } from '../../constants/parkingData';
 import { auth } from '../../firebase';
 import { useRouter, useFocusEffect } from 'expo-router';
@@ -159,28 +159,28 @@ export default function Bookings() {
         </View>
         
         <View style={styles.infoRow}>
-          <MaterialIcons name="access-time" size={18} color="#666" />
+          <FontAwesome name="clock-o" size={18} color="#666" />
           <Text style={styles.infoText}>
             From: {startTime}
           </Text>
         </View>
         
         <View style={styles.infoRow}>
-          <MaterialIcons name="access-time" size={18} color="#666" />
+          <FontAwesome name="clock-o" size={18} color="#666" />
           <Text style={styles.infoText}>
             To: {endTime}
           </Text>
         </View>
         
         <View style={styles.infoRow}>
-          <MaterialIcons name="attach-money" size={16} color="#666" />
+          <FontAwesome name="money" size={16} color="#666" />
           <Text style={styles.infoText}>
             Total Cost: Rs{item.totalCost.toFixed(2)}
           </Text>
         </View>
         
         <View style={styles.infoRow}>
-          <MaterialIcons name="schedule" size={18} color="#666" />
+          <FontAwesome name="calendar" size={18} color="#666" />
           <Text style={styles.infoText}>
             Duration: {item.duration} hour(s)
           </Text>
@@ -201,7 +201,7 @@ export default function Bookings() {
                   style={styles.navigateButton}
                   onPress={() => openMapsNavigation(item.latitude, item.longitude, item.parkingSpotTitle)}
                 >
-                  <MaterialIcons name="directions" size={16} color="#fff" />
+                  <FontAwesome name="location-arrow" size={16} color="#fff" />
                   <Text style={styles.navigateButtonText}>Directions</Text>
                 </TouchableOpacity>
               )}
@@ -223,7 +223,7 @@ export default function Bookings() {
           style={styles.backButton}
           onPress={() => router.back()}
         >
-          <MaterialIcons name="arrow-back" size={24} color="#333" />
+          <FontAwesome name="arrow-left" size={24} color="#333" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>My Bookings</Text>
         <View style={{ width: 24 }} />
@@ -236,7 +236,7 @@ export default function Bookings() {
         </View>
       ) : bookings.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <MaterialIcons name="date-range" size={100} color="#CCCCCC" />
+          <FontAwesome name="calendar" size={100} color="#CCCCCC" />
           <Text style={styles.emptyTitle}>No Bookings Found</Text>
           <Text style={styles.emptyText}>You haven't made any parking bookings yet.</Text>
           <TouchableOpacity 

@@ -1,22 +1,22 @@
 import React, { useEffect, useState, useRef, useCallback, useMemo, useContext } from 'react';
-import { 
-  StyleSheet, 
-  View, 
-  ActivityIndicator, 
-  Text, 
-  Linking, 
-  Platform, 
-  TextInput, 
-  TouchableOpacity, 
-  FlatList, 
-  Pressable, 
+import {
+  StyleSheet,
+  View,
+  ActivityIndicator,
+  Text,
+  Linking,
+  Platform,
+  TextInput,
+  TouchableOpacity,
+  FlatList,
+  Pressable,
   Dimensions,
   StatusBar,
   Image,
   Alert
 } from 'react-native';
 import * as Location from 'expo-location';
-import { MaterialIcons } from '@expo/vector-icons';
+import { FontAwesome } from '@expo/vector-icons';
 import Slider from '@react-native-community/slider';
 import Map from '../../../components/Map';
 import ParkingDetails from '../../../components/ParkingDetails';
@@ -47,7 +47,7 @@ function deg2rad(deg) {
 }
 
 export default function Home() {
-  const {setModalVisible} = useContext(GlobalState)
+  const { setModalVisible } = useContext(GlobalState)
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -67,10 +67,17 @@ export default function Home() {
   const [isFetchingParkingData, setIsFetchingParkingData] = useState(true);
   const [apiError, setApiError] = useState(null);
   const parkingSpotsRef = useRef([]);
+  const [SliderInteracting, setSliderInteracting] = useState("false")
+  const [Radius1, setRadius1] = useState(5)
 
   useEffect(() => {
     parkingSpotsRef.current = parkingSpots;
   }, [parkingSpots]);
+
+  useEffect(() => {
+      setRadius1(searchRadius)
+  }, [SliderInteracting])
+
 
   useEffect(() => {
     if (mapRef.current && location) {
@@ -100,12 +107,12 @@ export default function Home() {
         const processedSpots = spotsFromFirebase.map(spot => {
           let latitude = spot.latitude;
           let longitude = spot.longitude;
-          
+
           if ((!latitude || !longitude) && spot.location?.coordinates) {
             longitude = spot.location.coordinates[0];
             latitude = spot.location.coordinates[1];
           }
-          
+
           latitude = typeof latitude === 'string' ? parseFloat(latitude) : latitude;
           longitude = typeof longitude === 'string' ? parseFloat(longitude) : longitude;
 
@@ -113,7 +120,7 @@ export default function Home() {
           if (typeof price === 'number') {
             price = `₹ ${price}/hour`;
           }
-          
+
           return {
             ...spot,
             latitude,
@@ -124,11 +131,11 @@ export default function Home() {
             title: spot.title || 'Parking Spot'
           };
         }).filter(spot => {
-          const isValid = spot.latitude && spot.longitude && 
+          const isValid = spot.latitude && spot.longitude &&
             !isNaN(spot.latitude) && !isNaN(spot.longitude);
           return isValid;
         });
-        
+
         if (location) {
           const spotsWithDistances = processedSpots.map(spot => ({
             ...spot,
@@ -153,11 +160,11 @@ export default function Home() {
     };
 
     loadParkingSpots();
-  }, [location]); 
+  }, [location]);
 
   const updateParkingSpots = useCallback((newLocation) => {
     if (!newLocation) return;
-    
+
     const spotsWithDistances = parkingSpotsRef.current.map(spot => ({
       ...spot,
       distance: getDistance(
@@ -179,7 +186,7 @@ export default function Home() {
         );
         return;
       }
-      
+
       if (!parking.id) {
         Alert.alert(
           "Error",
@@ -187,7 +194,7 @@ export default function Home() {
         );
         return;
       }
-      
+
       if (!parking.availableSpots || parking.availableSpots <= 0) {
         Alert.alert(
           "Sorry",
@@ -195,7 +202,7 @@ export default function Home() {
         );
         return;
       }
-      
+
       setModalVisible(true);
       router.push(`/(tabs)/Home/Booking/${parking.id}`);
     } catch (error) {
@@ -211,11 +218,11 @@ export default function Home() {
       setSearchResults([]);
       return;
     }
-  
+
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
     }
-    
+
     searchTimeoutRef.current = setTimeout(async () => {
       setIsSearching(true);
       try {
@@ -227,7 +234,7 @@ export default function Home() {
                 latitude: result.latitude,
                 longitude: result.longitude,
               });
-              const formattedAddress = address[0] ? 
+              const formattedAddress = address[0] ?
                 [
                   address[0].name,
                   address[0].street,
@@ -288,19 +295,19 @@ export default function Home() {
       setLocationName('Your Location');
       setIsCustomLocation(false);
       if (parkingSpots.length > 0) {
-        const currentFiltered = parkingSpots.filter(spot => 
+        const currentFiltered = parkingSpots.filter(spot =>
           spot.distance <= searchRadius
         );
         setSelectedParking(null);
         setSearchResults([]);
       }
     }
-    
+
     try {
       const { coords } = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Low 
+        accuracy: Location.Accuracy.Low
       });
-      
+
       const newLocation = {
         latitude: coords.latitude,
         longitude: coords.longitude,
@@ -332,7 +339,7 @@ export default function Home() {
 
   const handleMapLongPress = useCallback(async (event) => {
     const { coordinate } = event.nativeEvent;
-    
+
     const newLocation = {
       latitude: coordinate.latitude,
       longitude: coordinate.longitude,
@@ -348,15 +355,15 @@ export default function Home() {
         latitude: coordinate.latitude,
         longitude: coordinate.longitude,
       });
-      
-      const formattedAddress = address[0] ? 
+
+      const formattedAddress = address[0] ?
         [
           address[0].name,
           address[0].street,
           address[0].city,
           address[0].region
         ].filter(Boolean).join(', ') : 'Selected Location';
-      
+
       setLocationName(formattedAddress);
     } catch (error) {
       setLocationName('Selected Location');
@@ -365,7 +372,7 @@ export default function Home() {
 
   useEffect(() => {
     let isMounted = true;
-    
+
     const getInitialLocation = async () => {
       try {
         let { status } = await Location.requestForegroundPermissionsAsync();
@@ -377,7 +384,7 @@ export default function Home() {
           return;
         }
         let lastKnownLocation = await Location.getLastKnownPositionAsync();
-        
+
         if (lastKnownLocation && isMounted) {
           const quickLocation = {
             latitude: lastKnownLocation.coords.latitude,
@@ -415,7 +422,7 @@ export default function Home() {
     };
 
     getInitialLocation();
-    
+
     return () => {
       isMounted = false;
       if (searchTimeoutRef.current) {
@@ -423,7 +430,7 @@ export default function Home() {
       }
     };
   }, [updateParkingSpots]);
-  
+
   useEffect(() => {
     if (mapRef.current && location) {
       mapRef.current.animateToRegion({
@@ -433,7 +440,7 @@ export default function Home() {
         longitudeDelta: 0.0421,
       }, 1000);
     }
-  }, [location]); 
+  }, [location]);
   const filteredParkingSpots = useMemo(() => {
     const filtered = parkingSpots.filter(spot => spot.distance <= searchRadius);
     return filtered.map(spot => ({
@@ -459,7 +466,7 @@ export default function Home() {
         if (typeof price === 'number') {
           price = `₹ ${price}/hour`;
         }
-        
+
         return {
           ...spot,
           latitude,
@@ -470,7 +477,7 @@ export default function Home() {
           title: spot.title || 'Parking Spot'
         };
       }).filter(spot => {
-        const isValid = spot.latitude && spot.longitude && 
+        const isValid = spot.latitude && spot.longitude &&
           !isNaN(spot.latitude) && !isNaN(spot.longitude);
         return isValid;
       });
@@ -488,7 +495,7 @@ export default function Home() {
       } else {
         setParkingSpots(processedSpots);
       }
-      
+
       setApiError(null);
     } catch (error) {
       setApiError('Failed to refresh parking spots from Firebase');
@@ -499,47 +506,47 @@ export default function Home() {
   const focusOnParkingSpot = useCallback((spot) => {
     if (!spot || !spot.latitude || !spot.longitude || !mapRef.current) return;
     const { height } = Dimensions.get('window');
-    
+
     const region = {
-      latitude: spot.latitude - 0.001, 
+      latitude: spot.latitude - 0.001,
       longitude: spot.longitude,
       latitudeDelta: 0.005,
       longitudeDelta: 0.005,
     };
-  
+
     mapRef.current.animateToRegion(region, 500);
   }, []);
-  
+
   const handleParkingSelection = useCallback((spot) => {
     setSelectedParking(spot);
     setTimeout(() => focusOnParkingSpot(spot), 100);
   }, [focusOnParkingSpot]);
-  
+
   const handleNextParking = useCallback(() => {
     if (!filteredParkingSpots || filteredParkingSpots.length === 0 || !selectedParking) {
       return;
     }
-    
+
     const sortedSpots = [...filteredParkingSpots].sort((a, b) => {
       if (a.distance && b.distance) {
         return a.distance - b.distance;
       }
       return 0;
     });
-    
+
     const currentIndex = sortedSpots.findIndex(spot => spot.id === selectedParking.id);
-    
+
     let nextSpot;
     if (currentIndex === -1 || currentIndex === sortedSpots.length - 1) {
       nextSpot = sortedSpots[0];
     } else {
       nextSpot = sortedSpots[currentIndex + 1];
     }
-    
+
     setSelectedParking(nextSpot);
     focusOnParkingSpot(nextSpot);
   }, [filteredParkingSpots, selectedParking, focusOnParkingSpot]);
-  
+
   const handlePrevParking = useCallback(() => {
     if (!filteredParkingSpots || filteredParkingSpots.length === 0 || !selectedParking) {
       return;
@@ -551,14 +558,14 @@ export default function Home() {
       return 0;
     });
     const currentIndex = sortedSpots.findIndex(spot => spot.id === selectedParking.id);
-    
+
     let prevSpot;
     if (currentIndex === -1 || currentIndex === 0) {
       prevSpot = sortedSpots[sortedSpots.length - 1];
     } else {
       prevSpot = sortedSpots[currentIndex - 1];
     }
-    
+
     setSelectedParking(prevSpot);
     focusOnParkingSpot(prevSpot);
   }, [filteredParkingSpots, selectedParking, focusOnParkingSpot]);
@@ -572,7 +579,7 @@ export default function Home() {
       }
 
       // Filter spots within the search radius
-      const filteredParkingSpots = parkingSpots.filter(spot => 
+      const filteredParkingSpots = parkingSpots.filter(spot =>
         typeof spot.distance === 'number' && spot.distance <= searchRadius
       );
 
@@ -588,7 +595,7 @@ export default function Home() {
 
       // Select the closest spot
       const firstSpot = sortedSpots[0];
-      
+
       if (!firstSpot || !firstSpot.id) {
         Alert.alert("Error", "Unable to select parking spot. Please try again.");
         return;
@@ -609,10 +616,10 @@ export default function Home() {
       <View style={styles.container}>
         <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
         <View style={styles.errorGradient}>
-          <MaterialIcons name="error" size={64} color="#ff3b30" />
+          <FontAwesome name="exclamation-circle" size={64} color="#ff3b30" />
           <Text style={styles.errorTitle}>Location Error</Text>
-        <Text style={styles.errorText}>{errorMsg}</Text>
-          <TouchableOpacity 
+          <Text style={styles.errorText}>{errorMsg}</Text>
+          <TouchableOpacity
             style={styles.errorButton}
             onPress={() => router.replace('/')}
           >
@@ -629,14 +636,14 @@ export default function Home() {
         <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
         <View style={styles.loadingGradient}>
           <View style={styles.logoContainer}>
-            <Image 
-              source={require('../../../assets/adaptive-icon.png')} 
+            <Image
+              source={require('../../../assets/adaptive-icon.png')}
               style={styles.logo}
               resizeMode="contain"
             />
           </View>
           <ActivityIndicator size="large" color="#007AFF" style={styles.loader} />
-        <Text style={styles.loadingText}>Finding nearby parking spots...</Text>
+          <Text style={styles.loadingText}>Finding nearby parking spots...</Text>
           <Text style={styles.loadingSubText}>We're searching for the best options around you</Text>
         </View>
       </View>
@@ -659,14 +666,14 @@ export default function Home() {
         onRefreshLocation={handleResetLocation}
       />
       {apiError && (
-        <Animated.View 
+        <Animated.View
           entering={FadeIn.duration(300)}
           style={styles.errorOverlay}
         >
           <View style={styles.errorBlur}>
-            <MaterialIcons name="warning" size={32} color="#ff9500" />
+            <FontAwesome name="exclamation-triangle" size={32} color="#ff9500" />
             <Text style={styles.errorOverlayText}>{apiError}</Text>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.errorButton}
               onPress={refreshParkingSpots}
             >
@@ -678,166 +685,168 @@ export default function Home() {
 
       <View style={styles.searchContainer}>
         <View style={styles.searchBlur}>
-        <View style={styles.topBar}>
-          <Pressable 
-            style={styles.locationButton}
-            onPress={() => {
-              setShowSearch(true);
-              setSearchQuery('');
-              setSearchResults([]);
-            }}
-          >
-            <MaterialIcons 
-              name={isCustomLocation ? "location-on" : "location-on"} 
-              size={24} 
-              color="#007AFF" 
-            />
-            <Text style={styles.locationText} numberOfLines={1}>
-              {locationName}
-            </Text>
-            <MaterialIcons name="keyboard-arrow-down" size={16} color="#007AFF" />
-          </Pressable>
-          
-          <View style={styles.topBarButtons}>
-            {isCustomLocation && (
-              <TouchableOpacity
-                style={styles.iconButton}
-                onPress={handleResetLocation}
-                disabled={isResettingLocation}
-              >
-                {isResettingLocation ? (
-                  <ActivityIndicator size="small" color="#007AFF" />
-                ) : (
-                  <MaterialIcons name="home" size={22} color="#007AFF" />
-                )}
-              </TouchableOpacity>
-            )}
-              
-              <TouchableOpacity
-                style={styles.iconButton}
-                onPress={refreshParkingSpots}
-              >
-                <MaterialIcons name="refresh" size={22} color="#007AFF" />
-              </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={styles.iconButton}
+          <View style={styles.topBar}>
+            <Pressable
+              style={styles.locationButton}
               onPress={() => {
                 setShowSearch(true);
                 setSearchQuery('');
                 setSearchResults([]);
               }}
             >
-              <MaterialIcons name="search" size={22} color="#007AFF" />
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={styles.iconButton}
-              onPress={() => setShowFilter(!showFilter)}
-            >
-              <MaterialIcons name="tune" size={22} color="#007AFF" />
-            </TouchableOpacity>
-          </View>
-        </View>
+              <FontAwesome
+                name={isCustomLocation ? "location-arrow" : "location-arrow"}
+                size={24}
+                color="#007AFF"
+              />
+              <Text style={styles.locationText} numberOfLines={1}>
+                {locationName}
+              </Text>
+              <FontAwesome name="angle-down" size={16} color="#007AFF" />
+            </Pressable>
 
-        {showSearch && (
-            <Animated.View 
+            <View style={styles.topBarButtons}>
+              {isCustomLocation && (
+                <TouchableOpacity
+                  style={styles.iconButton}
+                  onPress={handleResetLocation}
+                  disabled={isResettingLocation}
+                >
+                  {isResettingLocation ? (
+                    <ActivityIndicator size="small" color="#007AFF" />
+                  ) : (
+                    <FontAwesome name="home" size={22} color="#007AFF" />
+                  )}
+                </TouchableOpacity>
+              )}
+
+              <TouchableOpacity
+                style={styles.iconButton}
+                onPress={refreshParkingSpots}
+              >
+                <FontAwesome name="refresh" size={22} color="#007AFF" />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.iconButton}
+                onPress={() => {
+                  setShowSearch(true);
+                  setSearchQuery('');
+                  setSearchResults([]);
+                }}
+              >
+                <FontAwesome name="search" size={22} color="#007AFF" />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.iconButton}
+                onPress={() => setShowFilter(!showFilter)}
+              >
+                <FontAwesome name="sliders" size={22} color="#007AFF" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {showSearch && (
+            <Animated.View
               entering={FadeIn.duration(300)}
               exiting={FadeOut.duration(300)}
               style={styles.searchInputContainer}
             >
-            <MaterialIcons name="search" size={20} color="#666" style={styles.searchIcon} />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search for a location..."
-              value={searchQuery}
-              onChangeText={(text) => {
-                setSearchQuery(text);
-                searchLocations(text);
-              }}
-              autoFocus
+              <FontAwesome name="search" size={20} color="#666" style={styles.searchIcon} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search for a location..."
+                value={searchQuery}
+                onChangeText={(text) => {
+                  setSearchQuery(text);
+                  searchLocations(text);
+                }}
+                autoFocus
                 placeholderTextColor="#999"
-            />
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => {
-                setShowSearch(false);
-                setSearchQuery('');
-                setSearchResults([]);
-              }}
-            >
-              <MaterialIcons name="close" size={20} color="#666" />
-            </TouchableOpacity>
-            </Animated.View>
-        )}
-
-        {searchResults.length > 0 && (
-            <Animated.View
-              entering={FadeIn.duration(300)}
-            style={styles.searchResults}
-            >
-              <FlatList
-            data={searchResults}
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={({ item }) => (
+              />
               <TouchableOpacity
-                style={styles.searchResultItem}
+                style={styles.closeButton}
                 onPress={() => {
-                  handleLocationSelect(item);
                   setShowSearch(false);
                   setSearchQuery('');
+                  setSearchResults([]);
                 }}
               >
-                    <MaterialIcons name="location-on" size={20} color="#007AFF" style={styles.resultIcon} />
-                <Text style={styles.searchResultText}>{item.address}</Text>
+                <FontAwesome name="close" size={20} color="#666" />
               </TouchableOpacity>
-            )}
-          />
             </Animated.View>
-        )}
+          )}
+
+          {searchResults.length > 0 && (
+            <Animated.View
+              entering={FadeIn.duration(300)}
+              style={styles.searchResults}
+            >
+              <FlatList
+                data={searchResults}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.searchResultItem}
+                    onPress={() => {
+                      handleLocationSelect(item);
+                      setShowSearch(false);
+                      setSearchQuery('');
+                    }}
+                  >
+                    <FontAwesome name="map-marker" size={20} color="#007AFF" style={styles.resultIcon} />
+                    <Text style={styles.searchResultText}>{item.address}</Text>
+                  </TouchableOpacity>
+                )}
+              />
+            </Animated.View>
+          )}
         </View>
       </View>
 
       {showFilter && (
-        <Animated.View 
+        <Animated.View
           entering={FadeIn.duration(300)}
           style={styles.radiusContainer}
         >
           <View style={styles.radiusBlur}>
-          <View style={styles.radiusHeader}>
-            <Text style={styles.radiusText}>Search Radius: {searchRadius} km</Text>
-            <TouchableOpacity
-              style={styles.closeFilterButton}
-              onPress={() => setShowFilter(false)}
-            >
-              <MaterialIcons name="close" size={20} color="#666" />
-            </TouchableOpacity>
-          </View>
-          <View style={styles.sliderContainer}>
+            <View style={styles.radiusHeader}>
+              <Text style={styles.radiusText}>Search Radius: {searchRadius} km</Text>
+              <TouchableOpacity
+                style={styles.closeFilterButton}
+                onPress={() => setShowFilter(false)}
+              >
+                <FontAwesome name="close" size={20} color="#666" />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.sliderContainer}>
               <View style={styles.sliderLabelContainer}>
-            <Text style={styles.sliderLabel}>1</Text>
-            <Slider
-              style={styles.slider}
-              minimumValue={1}
-              maximumValue={10}
-              step={1}
-              value={5}
-              onValueChange={setSearchRadius}
-              minimumTrackTintColor="#007AFF"
-              maximumTrackTintColor="#D3D3D3"
-              thumbTintColor="#007AFF"
-            />
-            <Text style={styles.sliderLabel}>10</Text>
-          </View>
+                <Text style={styles.sliderLabel}>1</Text>
+                <Slider
+                  style={styles.slider}
+                  minimumValue={1}
+                  maximumValue={10}
+                  step={1}
+                  value={Radius1}
+                  onValueChange={setSearchRadius}
+                  onSlidingStart={() => setSliderInteracting(true)}
+                  onSlidingComplete={() => setSliderInteracting(false)}
+                  minimumTrackTintColor="#007AFF"
+                  maximumTrackTintColor="#D3D3D3"
+                  thumbTintColor="#007AFF"
+                />
+                <Text style={styles.sliderLabel}>10</Text>
+              </View>
               <Text style={styles.radiusHint}>Drag to adjust your search radius</Text>
-        </View>
+            </View>
           </View>
         </Animated.View>
       )}
-      
+
       {/* Show bottom handle for finding parking spots */}
-      {filteredParkingSpots.length > 0 && selectedParking== null && (
-        <TouchableOpacity 
+      {filteredParkingSpots.length > 0 && selectedParking == null && (
+        <TouchableOpacity
           style={styles.bottomSheetHandle}
           onPress={handleOpenParkingDetails}
         >

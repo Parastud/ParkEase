@@ -1,6 +1,6 @@
 import React, { useCallback, memo, useMemo } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Platform, Dimensions } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import { FontAwesome } from '@expo/vector-icons';
 import Animated, { 
   SlideInDown, 
   SlideOutDown, 
@@ -20,7 +20,6 @@ import { useAnimatedGestureHandler } from 'react-native-reanimated';
 
 const { width } = Dimensions.get('window');
 
-// Move styles outside component to prevent recreation
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
@@ -207,13 +206,13 @@ const ParkingCard = memo(({
   
   // Icons for better UI - moved inside component body
   const icons = useMemo(() => ({
-    car: <MaterialIcons name="directions-car" size={18} color="#007AFF" />,
-    location: <MaterialIcons name="location-on" size={18} color="#007AFF" />,
-    time: <MaterialIcons name="access-time" size={18} color="#007AFF" />,
-    star: <MaterialIcons name="star" size={16} color="#FFD700" />,
-    navigate: <MaterialIcons name="navigation" size={20} color="#007AFF" />,
-    chevronForward: <MaterialIcons name="arrow-forward-ios" size={24} color="#007AFF" />,
-    chevronBack: <MaterialIcons name="arrow-back-ios" size={24} color="#007AFF" />
+    car: <FontAwesome name="car" size={18} color="#007AFF" />,
+    location: <FontAwesome name="map-marker" size={18} color="#007AFF" />,
+    time: <FontAwesome name="clock-o" size={18} color="#007AFF" />,
+    star: <FontAwesome name="star" size={16} color="#FFD700" />,
+    navigate: <FontAwesome name="location-arrow" size={20} color="#007AFF" />,
+    chevronForward: <FontAwesome name="chevron-right" size={24} color="#007AFF" />,
+    chevronBack: <FontAwesome name="chevron-left" size={24} color="#007AFF" />
   }), []);
   
   const translateX = useSharedValue(0);

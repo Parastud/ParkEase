@@ -14,7 +14,7 @@ import {
   Platform,
   Dimensions
 } from 'react-native';
-import { FontAwesome, MaterialIcons } from 'react-native-vector-icons';
+import {FontAwesome } from 'react-native-vector-icons';
 import { addParkingSpot, uploadParkingImage, checkIsRegisteredOwner } from '../../constants/parkingData';
 import { router } from 'expo-router';
 import { auth } from '../../firebase';
@@ -469,7 +469,7 @@ export default function AddParkingSpot() {
             onPress={pickImage}
           >
             <View style={styles.uploadPlaceholder}>
-              <MaterialIcons name="add-photo-alternate" size={50} color="#007AFF" />
+              <FontAwesome name="camera" size={50} color="#007AFF" />
               <Text style={styles.uploadText}>Upload More Images</Text>
             </View>
           </TouchableOpacity>

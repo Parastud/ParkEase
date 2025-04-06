@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { auth } from '../../firebase';
-import { FontAwesome, MaterialIcons } from 'react-native-vector-icons';
+import { FontAwesome } from 'react-native-vector-icons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { getOwnerBookings, checkExpiredBookings, approveBooking, rejectBooking, checkIsRegisteredOwner } from '../../constants/parkingData';
 
@@ -235,7 +235,7 @@ export default function BookingRequests() {
         </View>
         
         <View style={styles.infoRow}>
-          <MaterialIcons name="schedule" size={18} color="#666" />
+          <FontAwesome name="clock-o" size={18} color="#666" />
           <Text style={styles.infoText}>
             Duration: {item.duration || '0'} hour(s)
           </Text>

@@ -1,7 +1,7 @@
-import React, { forwardRef, useEffect, useRef, useCallback } from 'react';
+import React, { forwardRef, useEffect, useRef, useCallback, useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Dimensions, Platform, ActivityIndicator } from 'react-native';
 import MapView, { Marker, Circle, PROVIDER_GOOGLE, Callout } from 'react-native-maps';
-import { MaterialIcons } from '@expo/vector-icons';
+import { FontAwesome } from '@expo/vector-icons';
 
 const { width, height } = Dimensions.get('window');
 
@@ -18,6 +18,7 @@ const Map = forwardRef(({
 }, ref) => {
   // Refs for marker components
   const markerRefs = useRef({});
+  const [zoomLevel, setZoomLevel] = useState(15);
   
   // Effect to show callout for selected parking
   useEffect(() => {
@@ -28,6 +29,13 @@ const Map = forwardRef(({
       }, 300);
     }
   }, [selectedParking]);
+  
+  // Handle region change to determine zoom level
+  const handleRegionChange = (region) => {
+    // Calculate zoom level from latitude delta
+    const zoom = Math.round(Math.log2(360 / region.latitudeDelta));
+    setZoomLevel(zoom);
+  };
   
   // Loading state
   if (!location) {
@@ -44,6 +52,16 @@ const Map = forwardRef(({
     !isNaN(spot.latitude) && !isNaN(spot.longitude)
   ) : [];
 
+  // Determine marker size based on zoom level
+  const getMarkerSize = () => {
+    if (zoomLevel < 12) return 20;
+    if (zoomLevel < 14) return 24; 
+    return 30; // Default size
+  };
+  
+  const markerSize = getMarkerSize();
+  const iconSize = markerSize * 0.55;
+
   return (
     <View style={styles.container}>
       <MapView
@@ -53,33 +71,21 @@ const Map = forwardRef(({
         initialRegion={{
           latitude: location.latitude,
           longitude: location.longitude,
-          latitudeDelta: searchRadius * 0.1, // Adjust zoom level based on radius
+          latitudeDelta: searchRadius * 0.1,
           longitudeDelta: searchRadius * 0.1,
         }}
         onPress={onMapPress}
         onLongPress={onMapLongPress}
         showsUserLocation={!isCustomLocation}
+        onRegionChangeComplete={handleRegionChange}
       >
-        {/* User custom location marker */}
-        {isCustomLocation && (
-          <Marker
-            coordinate={{
-              latitude: location.latitude,
-              longitude: location.longitude,
-            }}
-            title="Selected Location"
-          >
-            <View style={styles.locationMarker} />
-          </Marker>
-        )}
-
         {/* Search radius circle */}
         <Circle
           center={{
             latitude: location.latitude,
             longitude: location.longitude,
           }}
-          radius={searchRadius * 1000} // Convert km to meters
+          radius={searchRadius * 1000}
           strokeWidth={2}
           strokeColor="rgba(0, 122, 255, 0.5)"
           fillColor="rgba(0, 122, 255, 0.15)"
@@ -98,23 +104,22 @@ const Map = forwardRef(({
           >
             <View style={[
               styles.parkingMarker,
+              { width: markerSize, height: markerSize, borderRadius: markerSize / 2 },
               selectedParking?.id === spot.id && styles.selectedParkingMarker
             ]}>
-              <MaterialIcons 
-                name="local-parking" 
-                size={16} 
+              <FontAwesome 
+                name="car" 
+                size={iconSize} 
                 color={selectedParking?.id === spot.id ? '#ffffff' : '#007AFF'} 
               />
+              {spot.availableSpots > 0 && (
+                <View style={styles.availabilityDot} />
+              )}
             </View>
           </Marker>
         ))}
       </MapView>
-      <TouchableOpacity 
-        style={styles.myLocationButton}
-        onPress={onRefreshLocation}
-      >
-        <MaterialIcons name="my-location" size={24} color="#007AFF" />
-      </TouchableOpacity>
+
     </View>
   );
 });
@@ -150,18 +155,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
-  locationMarker: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: 'rgba(0, 122, 255, 0.3)',
-    borderWidth: 2,
-    borderColor: '#007AFF',
-  },
   parkingMarker: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
     backgroundColor: '#ffffff',
     justifyContent: 'center',
     alignItems: 'center',
@@ -176,6 +170,17 @@ const styles = StyleSheet.create({
   selectedParkingMarker: {
     backgroundColor: '#007AFF',
     borderColor: '#ffffff',
+  },
+  availabilityDot: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#4CD964',
+    borderWidth: 1,
+    borderColor: '#fff',
   },
   spotCountContainer: {
     position: 'absolute',

@@ -12,7 +12,7 @@ import {
   KeyboardAvoidingView,
   Platform
 } from 'react-native';
-import { FontAwesome, MaterialIcons } from 'react-native-vector-icons';
+import { FontAwesome } from 'react-native-vector-icons';
 import { router } from 'expo-router';
 import { auth, db } from '../../firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
@@ -267,11 +267,11 @@ export default function OwnerProfile() {
               />
             ) : (
               <View style={styles.profileImagePlaceholder}>
-                <MaterialIcons name="person" size={60} color="#CCCCCC" />
+                <FontAwesome name="user" size={60} color="#CCCCCC" />
               </View>
             )}
             <View style={styles.editIconContainer}>
-              <MaterialIcons name="edit" size={20} color="#FFFFFF" />
+              <FontAwesome name="edit" size={20} color="#FFFFFF" />
             </View>
           </TouchableOpacity>
         </View>

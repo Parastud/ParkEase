@@ -10,7 +10,7 @@ import {
   Alert,
   RefreshControl
 } from 'react-native';
-import { FontAwesome, MaterialIcons } from 'react-native-vector-icons';
+import {FontAwesome } from 'react-native-vector-icons';
 import { getParkingSpotsForOwner, deleteParkingSpot, checkIsRegisteredOwner } from '../../constants/parkingData';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { auth } from '../../firebase';
@@ -205,7 +205,7 @@ export default function MyParkingSpots() {
       
       {!error && spots.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <MaterialIcons name="local-parking" size={80} color="#ccc" />
+          <FontAwesome name="car" size={80} color="#ccc" />
           <Text style={styles.emptyTitle}>No Parking Spots</Text>
           <Text style={styles.emptyMessage}>
             You haven't added any parking spots yet. Add your first spot to start earning.

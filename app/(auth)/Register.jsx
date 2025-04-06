@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { auth } from '../../firebase'
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
 import { useRouter } from 'expo-router'
-import { MaterialIcons } from '@expo/vector-icons'
+import { FontAwesome } from '@expo/vector-icons'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const Register = () => {
@@ -148,7 +148,7 @@ const Register = () => {
         >
           <Text className="text-gray-700 mb-2 font-medium">Full Name</Text>
           <View className="flex-row items-center border border-gray-300 rounded-xl px-4 bg-gray-50">
-            <MaterialIcons name="person" size={20} color="#6b7280" />
+            <FontAwesome name="user" size={20} color="#6b7280" />
             <TextInput
               placeholder="John Doe"
               value={name}
@@ -166,7 +166,7 @@ const Register = () => {
         >
           <Text className="text-gray-700 mb-2 font-medium">Email Address</Text>
           <View className="flex-row items-center border border-gray-300 rounded-xl px-4 bg-gray-50">
-            <MaterialIcons name="email" size={20} color="#6b7280" />
+            <FontAwesome name="envelope" size={20} color="#6b7280" />
             <TextInput
               placeholder="example@email.com"
               value={email}
@@ -186,7 +186,7 @@ const Register = () => {
         >
           <Text className="text-gray-700 mb-2 font-medium">Password</Text>
           <View className="flex-row items-center border border-gray-300 rounded-xl px-4 bg-gray-50">
-            <MaterialIcons name="lock" size={20} color="#6b7280" />
+            <FontAwesome name="lock" size={20} color="#6b7280" />
             <TextInput
               placeholder="Min. 6 characters"
               value={password}
@@ -196,8 +196,8 @@ const Register = () => {
               secureTextEntry={!showPassword}
             />
             <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-              <MaterialIcons
-                name={showPassword ? "visibility-off" : "visibility"}
+              <FontAwesome
+                name={showPassword ? "eye-slash" : "eye"}
                 size={20}
                 color="#6b7280"
               />
@@ -212,7 +212,7 @@ const Register = () => {
         >
           <Text className="text-gray-700 mb-2 font-medium">Confirm Password</Text>
           <View className="flex-row items-center border border-gray-300 rounded-xl px-4 bg-gray-50">
-            <MaterialIcons name="lock" size={20} color="#6b7280" />
+            <FontAwesome name="lock" size={20} color="#6b7280" />
             <TextInput
               placeholder="Confirm your password"
               value={confirmPassword}
@@ -222,8 +222,8 @@ const Register = () => {
               secureTextEntry={!showConfirmPassword}
             />
             <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
-              <MaterialIcons
-                name={showConfirmPassword ? "visibility-off" : "visibility"}
+              <FontAwesome
+                name={showConfirmPassword ? "eye-slash" : "eye"}
                 size={20}
                 color="#6b7280"
               />
@@ -241,7 +241,7 @@ const Register = () => {
             onPress={() => setAcceptTerms(!acceptTerms)}
           >
             <View className={`w-5 h-5 flex items-center justify-center rounded mt-0.5 mr-3 ${acceptTerms ? 'bg-blue-500' : 'border border-gray-300'}`}>
-              {acceptTerms && <MaterialIcons name="check" size={14} color="#fff" />}
+              {acceptTerms && <FontAwesome name="check" size={14} color="#fff" />}
             </View>
             <Text className="text-gray-600 flex-1">
               I accept the <Text className="text-blue-500 font-medium">Terms of Service</Text> and <Text className="text-blue-500 font-medium">Privacy Policy</Text>

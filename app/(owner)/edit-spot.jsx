@@ -13,7 +13,7 @@ import {
   KeyboardAvoidingView,
   Platform
 } from 'react-native';
-import { FontAwesome, MaterialIcons } from 'react-native-vector-icons';
+import {FontAwesome } from 'react-native-vector-icons';
 import { 
   getParkingSpotById, 
   updateParkingSpot, 
@@ -551,7 +551,7 @@ export default function EditParkingSpot() {
               />
             ) : (
               <View style={styles.uploadPlaceholder}>
-                <MaterialIcons name="add-photo-alternate" size={50} color="#007AFF" />
+                <FontAwesome name="camera" size={50} color="#007AFF" />
                 <Text style={styles.uploadText}>Upload Parking Image</Text>
               </View>
             )}
