@@ -16,28 +16,22 @@ const Map = forwardRef(({
   isCustomLocation,
   onRefreshLocation
 }, ref) => {
-  // Refs for marker components
   const markerRefs = useRef({});
   const [zoomLevel, setZoomLevel] = useState(15);
   
-  // Effect to show callout for selected parking
   useEffect(() => {
     if (selectedParking && selectedParking.id && markerRefs.current[selectedParking.id]) {
-      // Short delay to ensure marker is ready
       setTimeout(() => {
         markerRefs.current[selectedParking.id]?.showCallout();
       }, 300);
     }
   }, [selectedParking]);
   
-  // Handle region change to determine zoom level
   const handleRegionChange = (region) => {
-    // Calculate zoom level from latitude delta
     const zoom = Math.round(Math.log2(360 / region.latitudeDelta));
     setZoomLevel(zoom);
   };
-  
-  // Loading state
+
   if (!location) {
     return (
       <View style={styles.container}>
@@ -45,18 +39,15 @@ const Map = forwardRef(({
       </View>
     );
   }
-
-  // Basic validation for parking spots
   const validSpots = Array.isArray(parkingSpots) ? parkingSpots.filter(spot => 
     spot && spot.latitude && spot.longitude && 
     !isNaN(spot.latitude) && !isNaN(spot.longitude)
   ) : [];
 
-  // Determine marker size based on zoom level
   const getMarkerSize = () => {
     if (zoomLevel < 12) return 20;
     if (zoomLevel < 14) return 24; 
-    return 30; // Default size
+    return 30; 
   };
   
   const markerSize = getMarkerSize();
@@ -79,7 +70,7 @@ const Map = forwardRef(({
         showsUserLocation={!isCustomLocation}
         onRegionChangeComplete={handleRegionChange}
       >
-        {/* Search radius circle */}
+
         <Circle
           center={{
             latitude: location.latitude,
@@ -101,21 +92,19 @@ const Map = forwardRef(({
             title={spot.title || "Parking Spot"}
             description={`${spot.availableSpots || 0} of ${spot.totalSpots || 0} spots available${spot.distance ? ` • ${spot.distance.toFixed(1)} km away` : ''}`}
             onPress={() => onParkingSelected(spot)}
+            image={require('../assets/car.png')}
           >
-            <View style={[
+            {/* <View style={[
               styles.parkingMarker,
               { width: markerSize, height: markerSize, borderRadius: markerSize / 2 },
               selectedParking?.id === spot.id && styles.selectedParkingMarker
             ]}>
-              <FontAwesome 
-                name="car" 
-                size={iconSize} 
-                color={selectedParking?.id === spot.id ? '#ffffff' : '#007AFF'} 
-              />
+              <FontAwesome name="car" size={10} color="#007AFF" />
+              
               {spot.availableSpots > 0 && (
                 <View style={styles.availabilityDot} />
               )}
-            </View>
+            </View> */}
           </Marker>
         ))}
       </MapView>
@@ -141,7 +130,7 @@ const styles = StyleSheet.create({
   },
   myLocationButton: {
     position: 'absolute',
-    bottom: height * 0.18, // Positioned above the bottom sheet handle
+    bottom: height * 0.18,
     right: 20,
     backgroundColor: 'white',
     borderRadius: 30,

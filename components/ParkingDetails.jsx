@@ -226,7 +226,6 @@ const ParkingCard = memo(({
     }
   }, [onSwipeNext, onSwipePrev]);
 
-  // Handlers wrapped in useCallback to ensure stable references
   const handleNavigate = useCallback(() => {
     if (onNavigate) onNavigate();
   }, [onNavigate]);
@@ -234,8 +233,6 @@ const ParkingCard = memo(({
   const handleBook = useCallback(() => {
     if (onBook) onBook();
   }, [onBook]);
-
-  // Memoize text values that need calculations to prevent re-renders
   const distanceText = useMemo(() => 
     distance ? `${distance.toFixed(1)} km away` : 'Distance unknown',
     [distance]
@@ -246,7 +243,6 @@ const ParkingCard = memo(({
     [availableSpots, totalSpots]
   );
   
-  // Using proper animated gesture handler
   const gestureHandler = useAnimatedGestureHandler({
     onStart: (_, ctx) => {
       ctx.startX = translateX.value;
@@ -255,12 +251,10 @@ const ParkingCard = memo(({
     onActive: (event, ctx) => {
       if (isAnimating.value === 1) return;
       
-      // Add resistance when swiping beyond a certain point
       const dragX = event.translationX;
-      const resistance = 0.6; // Less resistance for smoother feel
+      const resistance = 0.6;
       
       if (dragX > 0) {
-        // Swiping right (to previous)
         translateX.value = ctx.startX + (dragX > 100 ? 100 + (dragX - 100) * resistance : dragX);
       } else {
         // Swiping left (to next)
