@@ -569,16 +569,12 @@ export default function Home() {
     setSelectedParking(prevSpot);
     focusOnParkingSpot(prevSpot);
   }, [filteredParkingSpots, selectedParking, focusOnParkingSpot]);
-
-  // Modify handleOpenParkingDetails to use the focus function
   const handleOpenParkingDetails = useCallback(() => {
     try {
       if (!parkingSpots || parkingSpots.length === 0) {
         Alert.alert("No Parking Spots", "No parking spots available in this area.");
         return;
       }
-
-      // Filter spots within the search radius
       const filteredParkingSpots = parkingSpots.filter(spot =>
         typeof spot.distance === 'number' && spot.distance <= searchRadius
       );
@@ -587,13 +583,9 @@ export default function Home() {
         Alert.alert("No Nearby Spots", "No parking spots found in your selected radius. Try increasing the search distance.");
         return;
       }
-
-      // Sort by distance (closest first)
       const sortedSpots = [...filteredParkingSpots].sort((a, b) => {
         return a.distance - b.distance;
       });
-
-      // Select the closest spot
       const firstSpot = sortedSpots[0];
 
       if (!firstSpot || !firstSpot.id) {
@@ -601,7 +593,6 @@ export default function Home() {
         return;
       }
 
-      // Set this spot as selected
       setSelectedParking(firstSpot);
       focusOnParkingSpot(firstSpot);
 
@@ -610,7 +601,6 @@ export default function Home() {
     }
   }, [parkingSpots, searchRadius, focusOnParkingSpot]);
 
-  // Loading state with minimal UI
   if (errorMsg) {
     return (
       <View style={styles.container}>

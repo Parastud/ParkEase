@@ -1,9 +1,8 @@
 import React, { forwardRef, useEffect, useRef, useCallback, useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Dimensions, Platform, ActivityIndicator } from 'react-native';
 import MapView, { Marker, Circle, PROVIDER_GOOGLE, Callout } from 'react-native-maps';
-import { FontAwesome } from '@expo/vector-icons';
 
-const { width, height } = Dimensions.get('window');
+const { height } = Dimensions.get('window');
 
 const Map = forwardRef(({
   location,
@@ -18,7 +17,7 @@ const Map = forwardRef(({
 }, ref) => {
   const markerRefs = useRef({});
   const [zoomLevel, setZoomLevel] = useState(15);
-  
+
   useEffect(() => {
     if (selectedParking && selectedParking.id && markerRefs.current[selectedParking.id]) {
       setTimeout(() => {
@@ -26,7 +25,7 @@ const Map = forwardRef(({
       }, 300);
     }
   }, [selectedParking]);
-  
+
   const handleRegionChange = (region) => {
     const zoom = Math.round(Math.log2(360 / region.latitudeDelta));
     setZoomLevel(zoom);
@@ -39,17 +38,17 @@ const Map = forwardRef(({
       </View>
     );
   }
-  const validSpots = Array.isArray(parkingSpots) ? parkingSpots.filter(spot => 
-    spot && spot.latitude && spot.longitude && 
+  const validSpots = Array.isArray(parkingSpots) ? parkingSpots.filter(spot =>
+    spot && spot.latitude && spot.longitude &&
     !isNaN(spot.latitude) && !isNaN(spot.longitude)
   ) : [];
 
   const getMarkerSize = () => {
     if (zoomLevel < 12) return 20;
-    if (zoomLevel < 14) return 24; 
-    return 30; 
+    if (zoomLevel < 14) return 24;
+    return 30;
   };
-  
+
   const markerSize = getMarkerSize();
   const iconSize = markerSize * 0.55;
 
@@ -92,27 +91,14 @@ const Map = forwardRef(({
             title={spot.title || "Parking Spot"}
             description={`${spot.availableSpots || 0} of ${spot.totalSpots || 0} spots available${spot.distance ? ` • ${spot.distance.toFixed(1)} km away` : ''}`}
             onPress={() => onParkingSelected(spot)}
-            image={require('../assets/car.png')}
-          >
-            {/* <View style={[
-              styles.parkingMarker,
-              { width: markerSize, height: markerSize, borderRadius: markerSize / 2 },
-              selectedParking?.id === spot.id && styles.selectedParkingMarker
-            ]}>
-              <FontAwesome name="car" size={10} color="#007AFF" />
-              
-              {spot.availableSpots > 0 && (
-                <View style={styles.availabilityDot} />
-              )}
-            </View> */}
-          </Marker>
+            icon={require('../assets/car.png')}
+          />
         ))}
       </MapView>
 
     </View>
   );
 });
-
 Map.displayName = 'Map';
 
 const styles = StyleSheet.create({
