@@ -2,7 +2,7 @@ import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert, Scro
 import React, { useState } from 'react'
 import Animated, { FadeInDown } from 'react-native-reanimated'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { auth } from '../../firebase'
+import { auth } from '../../firebase1'
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
 import { useRouter } from 'expo-router'
 import { FontAwesome } from '@expo/vector-icons'

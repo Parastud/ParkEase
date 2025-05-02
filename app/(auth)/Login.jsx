@@ -1,7 +1,7 @@
 import { StyleSheet, Text, TextInput, View, ActivityIndicator, Alert, TouchableOpacity, Dimensions } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import Animated, { FadeInDown } from 'react-native-reanimated'
-import { auth, checkAuthState } from '../../firebase'
+import { auth, checkAuthState } from '../../firebase1'
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth'
 import { useRouter } from 'expo-router'
 import AsyncStorage from '@react-native-async-storage/async-storage'
