@@ -13,7 +13,6 @@ const firebaseConfig = {
   measurementId: "G-PLBX6LZFEC"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
 // Initialize Auth with persistence

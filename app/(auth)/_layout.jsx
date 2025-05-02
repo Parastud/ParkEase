@@ -17,7 +17,7 @@ const AuthLayout = () => {
     <View className="flex-1">
       <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
       <ImageBackground
-        source={require('../../assets/car.jpg')}
+        source={require('../../assets/car1.jpg')}
         className="absolute w-full h-full -top-1/2"
         resizeMode="cover"
       >
