@@ -1,6 +1,6 @@
 import React, { useCallback, memo, useMemo } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Platform, Dimensions } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome } from '@expo/vector-icons';
 import Animated, { 
   SlideInDown, 
   SlideOutDown, 
@@ -20,18 +20,6 @@ import { useAnimatedGestureHandler } from 'react-native-reanimated';
 
 const { width } = Dimensions.get('window');
 
-// Pre-create stable icons once for the entire application lifecycle
-const ICONS = {
-  car: <Ionicons name="car" size={18} color="#007AFF" />,
-  location: <Ionicons name="location" size={18} color="#007AFF" />,
-  time: <Ionicons name="time-outline" size={18} color="#007AFF" />,
-  star: <Ionicons name="star" size={16} color="#FFD700" />,
-  navigate: <Ionicons name="navigate" size={20} color="#007AFF" />,
-  chevronForward: <Ionicons name="chevron-forward" size={24} color="#007AFF" />,
-  chevronBack: <Ionicons name="chevron-back" size={24} color="#007AFF" />
-};
-
-// Move styles outside component to prevent recreation
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
@@ -124,24 +112,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  navigateButton: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0, 122, 255, 0.1)',
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    flex: 1,
-    marginRight: 10,
-  },
-  navigateText: {
-    color: '#007AFF',
-    fontWeight: '600',
-    fontSize: 16,
-    marginLeft: 6,
-  },
   bookButton: {
-    flex: 1.5,
+    flex: 1,
     borderRadius: 12,
     overflow: 'hidden',
   },
@@ -179,6 +151,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   }
 });
+
 const IconWrapper = memo(({ children }) => {
   return (
     <View style={styles.iconWrapper}>
@@ -197,17 +170,10 @@ const InfoItem = memo(({ icon, text }) => {
     </View>
   );
 });
+
 const StaticButtonLayout = memo(({ onBook, onNavigate }) => {
   return (
     <View style={styles.buttonContainer}>
-      <TouchableOpacity 
-        style={styles.navigateButton} 
-        onPress={onNavigate}
-      >
-        {ICONS.navigate}
-        <Text style={styles.navigateText}>Navigate</Text>
-      </TouchableOpacity>
-      
       <TouchableOpacity 
         style={styles.bookButton} 
         onPress={onBook}
@@ -219,6 +185,7 @@ const StaticButtonLayout = memo(({ onBook, onNavigate }) => {
     </View>
   );
 });
+
 const ParkingCard = memo(({ 
   parking, 
   onBook, 
@@ -236,6 +203,18 @@ const ParkingCard = memo(({
     hours = '24 hours',
     description = 'Convenient parking location with security and easy access.'
   } = parking;
+  
+  // Icons for better UI - moved inside component body
+  const icons = useMemo(() => ({
+    car: <FontAwesome name="car" size={18} color="#007AFF" />,
+    location: <FontAwesome name="map-marker" size={18} color="#007AFF" />,
+    time: <FontAwesome name="clock-o" size={18} color="#007AFF" />,
+    star: <FontAwesome name="star" size={16} color="#FFD700" />,
+    navigate: <FontAwesome name="location-arrow" size={20} color="#007AFF" />,
+    chevronForward: <FontAwesome name="chevron-right" size={24} color="#007AFF" />,
+    chevronBack: <FontAwesome name="chevron-left" size={24} color="#007AFF" />
+  }), []);
+  
   const translateX = useSharedValue(0);
   const isAnimating = useSharedValue(0);
   
@@ -247,7 +226,6 @@ const ParkingCard = memo(({
     }
   }, [onSwipeNext, onSwipePrev]);
 
-  // Handlers wrapped in useCallback to ensure stable references
   const handleNavigate = useCallback(() => {
     if (onNavigate) onNavigate();
   }, [onNavigate]);
@@ -255,8 +233,6 @@ const ParkingCard = memo(({
   const handleBook = useCallback(() => {
     if (onBook) onBook();
   }, [onBook]);
-
-  // Memoize text values that need calculations to prevent re-renders
   const distanceText = useMemo(() => 
     distance ? `${distance.toFixed(1)} km away` : 'Distance unknown',
     [distance]
@@ -267,7 +243,6 @@ const ParkingCard = memo(({
     [availableSpots, totalSpots]
   );
   
-  // Using proper animated gesture handler
   const gestureHandler = useAnimatedGestureHandler({
     onStart: (_, ctx) => {
       ctx.startX = translateX.value;
@@ -276,12 +251,10 @@ const ParkingCard = memo(({
     onActive: (event, ctx) => {
       if (isAnimating.value === 1) return;
       
-      // Add resistance when swiping beyond a certain point
       const dragX = event.translationX;
-      const resistance = 0.6; // Less resistance for smoother feel
+      const resistance = 0.6;
       
       if (dragX > 0) {
-        // Swiping right (to previous)
         translateX.value = ctx.startX + (dragX > 100 ? 100 + (dragX - 100) * resistance : dragX);
       } else {
         // Swiping left (to next)
@@ -438,7 +411,7 @@ const ParkingCard = memo(({
         <View style={styles.titleContainer}>
           <Text style={styles.title}>{title}</Text>
           <View style={styles.ratingContainer}>
-            {ICONS.star}
+            {icons.star}
             <Text style={styles.rating}>{rating}</Text>
           </View>
         </View>
@@ -447,17 +420,17 @@ const ParkingCard = memo(({
       
       <View style={styles.infoContainer}>
         <InfoItem 
-          icon={ICONS.location}
+          icon={icons.location}
           text={distanceText}
         />
         
         <InfoItem 
-          icon={ICONS.car}
+          icon={icons.car}
           text={spotsText}
         />
         
         <InfoItem 
-          icon={ICONS.time}
+          icon={icons.time}
           text={hours}
         />
       </View>
@@ -467,20 +440,19 @@ const ParkingCard = memo(({
       </Text>
       
       <StaticButtonLayout
-        onNavigate={handleNavigate}
         onBook={handleBook}
       />
     </View>
-  ), [title, price, rating, distanceText, spotsText, hours, description, handleNavigate, handleBook]);
+  ), [title, price, rating, distanceText, spotsText, hours, description, handleBook]);
 
   return (
     <View style={{ overflow: 'visible' }}>
       <Animated.View style={[styles.swipeArrow, styles.rightArrow, rightArrowStyle]}>
-        {ICONS.chevronForward}
+        {icons.chevronForward}
       </Animated.View>
       
       <Animated.View style={[styles.swipeArrow, styles.leftArrow, leftArrowStyle]}>
-        {ICONS.chevronBack}
+        {icons.chevronBack}
       </Animated.View>
       
       <PanGestureHandler

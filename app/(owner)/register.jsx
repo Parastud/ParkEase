@@ -11,7 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome } from 'react-native-vector-icons';
 import { router } from 'expo-router';
 import { auth, db } from '../../firebase';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
@@ -44,6 +44,7 @@ export default function OwnerRegistration() {
         "You need to be logged in to register as a parking owner.",
         [{ text: "OK", onPress: () => router.replace('/auth/login') }]
       );
+      router.replace('/Home');
     }
   };
 
@@ -175,7 +176,7 @@ export default function OwnerRegistration() {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="#007AFF" />
+            <FontAwesome name="arrow-left" size={24} color="#007AFF" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>
             {isAlreadyRegistered ? 'Update Owner Profile' : 'Register as Parking Owner'}

@@ -3,7 +3,6 @@ import { auth } from '../firebase';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getAuth } from 'firebase/auth';
 
-// Initialize Firestore using the existing auth instance
 const db = getFirestore();
 const storage = getStorage();
 
@@ -12,15 +11,6 @@ const parkingCollectionRef = collection(db, 'parkingSpots');
 const parkingOwnersCollectionRef = collection(db, 'parkingOwners');
 const bookingsCollectionRef = collection(db, 'bookings');
 const notificationsCollectionRef = collection(db, 'notifications');
-
-// Initialize collections if they don't exist (Firestore creates collections on first document)
-// We'll create collections automatically when data is first added
-// const initializeCollections = async () => {
-//   try {
-//     // Code removed to prevent permission errors
-//   } catch (error) {
-//   }
-// };
 
 // Call initialization function only if user is logged in
 auth.onAuthStateChanged((user) => {
@@ -437,25 +427,39 @@ export const getUserBookings = async () => {
       throw new Error('You must be logged in to view your bookings');
     }
     
-    const userId = auth.currentUser.uid;
-    
-    // Query for bookings made by this user
-    const q = query(bookingsCollectionRef, where("userId", "==", userId));
+    const q = query(bookingsCollectionRef, where("userId", "==", auth.currentUser.uid));
     const querySnapshot = await getDocs(q);
     
-    const bookings = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      // Ensure createdAt is a valid Date for sorting
-      createdAt: doc.data().createdAt ? 
-        (typeof doc.data().createdAt === 'object' && doc.data().createdAt.toDate ? 
-          doc.data().createdAt.toDate() : doc.data().createdAt) 
-        : new Date()
-    }));
+    if (querySnapshot.empty) {
+      return [];
+    }
     
-    return bookings;
+    const bookingsPromises = querySnapshot.docs.map(async (doc) => {
+      const bookingData = { id: doc.id, ...doc.data() };
+      
+      // Fetch the associated parking spot data for location info
+      if (bookingData.parkingSpotId) {
+        try {
+          const parkingSpot = await getParkingSpotById(bookingData.parkingSpotId);
+          if (parkingSpot) {
+            // Add the latitude and longitude from the parking spot to the booking
+            return {
+              ...bookingData,
+              latitude: parkingSpot.latitude,
+              longitude: parkingSpot.longitude
+            };
+          }
+        } catch (error) {
+          console.error("Error fetching parking spot:", error);
+        }
+      }
+      
+      return bookingData;
+    });
+    
+    return Promise.all(bookingsPromises);
   } catch (error) {
-    return [];
+    throw error;
   }
 };
 
@@ -479,7 +483,7 @@ export const getParkingSpotBookings = async (parkingSpotId) => {
 };
 
 // Function to cancel a booking
-export const cancelBooking = async (bookingId) => {
+export const cancelBooking = async (bookingId,type) => {
   try {
     const bookingDoc = await getDoc(doc(bookingsCollectionRef, bookingId));
     
@@ -488,7 +492,7 @@ export const cancelBooking = async (bookingId) => {
       
       // Update booking status
       await updateDoc(doc(bookingsCollectionRef, bookingId), {
-        status: 'cancelled',
+        status: type,
         cancelledAt: serverTimestamp()
       });
       

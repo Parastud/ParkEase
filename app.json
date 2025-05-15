@@ -2,7 +2,7 @@
   "expo": {
     "name": "ParkEase",
     "slug": "ParkEase",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "scheme": "ParkEase.com",
     "orientation": "default",
     "icon": "./assets/adaptive-icon.png",
@@ -16,8 +16,8 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.parastud.ParkEase",
-      "config": {
-        "googleMapsApiKey": "AIzaSyBZWIMFJUMPjAaI1UwHcrbAgBFW4_WiaiY"
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -26,14 +26,11 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.parastud.ParkEase",
-      "config": {
-        "googleMaps": {
-          "apiKey": "AIzaSyBZWIMFJUMPjAaI1UwHcrbAgBFW4_WiaiY"
-        }
-      },
       "permissions": [
         "ACCESS_COARSE_LOCATION",
-        "ACCESS_FINE_LOCATION"
+        "ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
       ]
     },
     "web": {
@@ -42,13 +39,13 @@
     },
     "plugins": [
       "expo-router",
-      
       [
         "expo-location",
         {
           "locationAlwaysAndWhenInUsePermission": "Allow ParkEase to use your location to find nearby parking spots."
         }
-      ]
+      ],
+      "sentry-expo"
     ],
     "extra": {
       "router": {

@@ -1,9 +1,8 @@
-import React, { forwardRef, useEffect, useRef } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Dimensions, Platform } from 'react-native';
+import React, { forwardRef, useEffect, useRef, useCallback, useState } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, Dimensions, Platform, ActivityIndicator } from 'react-native';
 import MapView, { Marker, Circle, PROVIDER_GOOGLE, Callout } from 'react-native-maps';
-import { Ionicons } from '@expo/vector-icons';
 
-const { width, height } = Dimensions.get('window');
+const { height } = Dimensions.get('window');
 
 const Map = forwardRef(({
   location,
@@ -16,20 +15,22 @@ const Map = forwardRef(({
   isCustomLocation,
   onRefreshLocation
 }, ref) => {
-  // Refs for marker components
   const markerRefs = useRef({});
-  
-  // Effect to show callout for selected parking
+  const [zoomLevel, setZoomLevel] = useState(15);
+
   useEffect(() => {
     if (selectedParking && selectedParking.id && markerRefs.current[selectedParking.id]) {
-      // Short delay to ensure marker is ready
       setTimeout(() => {
         markerRefs.current[selectedParking.id]?.showCallout();
       }, 300);
     }
   }, [selectedParking]);
-  
-  // Loading state
+
+  const handleRegionChange = (region) => {
+    const zoom = Math.round(Math.log2(360 / region.latitudeDelta));
+    setZoomLevel(zoom);
+  };
+
   if (!location) {
     return (
       <View style={styles.container}>
@@ -37,12 +38,19 @@ const Map = forwardRef(({
       </View>
     );
   }
-
-  // Basic validation for parking spots
-  const validSpots = Array.isArray(parkingSpots) ? parkingSpots.filter(spot => 
-    spot && spot.latitude && spot.longitude && 
+  const validSpots = Array.isArray(parkingSpots) ? parkingSpots.filter(spot =>
+    spot && spot.latitude && spot.longitude &&
     !isNaN(spot.latitude) && !isNaN(spot.longitude)
   ) : [];
+
+  const getMarkerSize = () => {
+    if (zoomLevel < 12) return 20;
+    if (zoomLevel < 14) return 24;
+    return 30;
+  };
+
+  const markerSize = getMarkerSize();
+  const iconSize = markerSize * 0.55;
 
   return (
     <View style={styles.container}>
@@ -53,36 +61,24 @@ const Map = forwardRef(({
         initialRegion={{
           latitude: location.latitude,
           longitude: location.longitude,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
+          latitudeDelta: searchRadius * 0.1,
+          longitudeDelta: searchRadius * 0.1,
         }}
         onPress={onMapPress}
         onLongPress={onMapLongPress}
         showsUserLocation={!isCustomLocation}
+        onRegionChangeComplete={handleRegionChange}
       >
-        {/* User custom location marker */}
-        {isCustomLocation && (
-          <Marker
-            coordinate={{
-              latitude: location.latitude,
-              longitude: location.longitude,
-            }}
-            title="Selected Location"
-          >
-            <View style={styles.locationMarker} />
-          </Marker>
-        )}
 
-        {/* Search radius circle */}
         <Circle
           center={{
             latitude: location.latitude,
             longitude: location.longitude,
           }}
-          radius={searchRadius * 1000} // Convert km to meters
-          strokeWidth={1}
-          strokeColor="rgba(0, 122, 255, 0.3)"
-          fillColor="rgba(0, 122, 255, 0.1)"
+          radius={searchRadius * 1000}
+          strokeWidth={2}
+          strokeColor="rgba(0, 122, 255, 0.5)"
+          fillColor="rgba(0, 122, 255, 0.15)"
         />
         {validSpots.map((spot, index) => (
           <Marker
@@ -95,30 +91,14 @@ const Map = forwardRef(({
             title={spot.title || "Parking Spot"}
             description={`${spot.availableSpots || 0} of ${spot.totalSpots || 0} spots available${spot.distance ? ` • ${spot.distance.toFixed(1)} km away` : ''}`}
             onPress={() => onParkingSelected(spot)}
-          >
-            <View style={[
-              styles.parkingMarker,
-              selectedParking?.id === spot.id && styles.selectedParkingMarker
-            ]}>
-              <Ionicons 
-                name="car" 
-                size={16} 
-                color={selectedParking?.id === spot.id ? '#ffffff' : '#007AFF'} 
-              />
-            </View>
-          </Marker>
+            icon={require('../assets/car.png')}
+          />
         ))}
       </MapView>
-      <TouchableOpacity 
-        style={styles.myLocationButton}
-        onPress={onRefreshLocation}
-      >
-        <Ionicons name="locate" size={24} color="#007AFF" />
-      </TouchableOpacity>
+
     </View>
   );
 });
-
 Map.displayName = 'Map';
 
 const styles = StyleSheet.create({
@@ -136,7 +116,7 @@ const styles = StyleSheet.create({
   },
   myLocationButton: {
     position: 'absolute',
-    bottom: height * 0.18, // Positioned above the bottom sheet handle
+    bottom: height * 0.18,
     right: 20,
     backgroundColor: 'white',
     borderRadius: 30,
@@ -150,18 +130,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
-  locationMarker: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: 'rgba(0, 122, 255, 0.3)',
-    borderWidth: 2,
-    borderColor: '#007AFF',
-  },
   parkingMarker: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
     backgroundColor: '#ffffff',
     justifyContent: 'center',
     alignItems: 'center',
@@ -176,6 +145,17 @@ const styles = StyleSheet.create({
   selectedParkingMarker: {
     backgroundColor: '#007AFF',
     borderColor: '#ffffff',
+  },
+  availabilityDot: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#4CD964',
+    borderWidth: 1,
+    borderColor: '#fff',
   },
   spotCountContainer: {
     position: 'absolute',

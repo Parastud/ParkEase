@@ -1,42 +1,45 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, initializeAuth, getReactNativePersistence, onAuthStateChanged } from "firebase/auth";
+import { initializeAuth, getReactNativePersistence, onAuthStateChanged } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  FIREBASE_API_KEY,
+  FIREBASE_AUTH_DOMAIN,
+  FIREBASE_PROJECT_ID,
+  FIREBASE_STORAGE_BUCKET,
+  FIREBASE_MESSAGING_SENDER_ID,
+  FIREBASE_APP_ID,
+  FIREBASE_MEASUREMENT_ID
+} from '@env';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDpTGLuctyb6DMwYqxQTBW-9kPP20d_fu4",
-  authDomain: "parkease-parastud.firebaseapp.com",
-  projectId: "parkease-parastud",
-  storageBucket: "parkease-parastud.appspot.com",
-  messagingSenderId: "444176514449",
-  appId: "1:444176514449:web:8fbe1fb7dc168cf775ee30",
-  measurementId: "G-PLBX6LZFEC"
+  apiKey: FIREBASE_API_KEY,
+  authDomain: FIREBASE_AUTH_DOMAIN,
+  projectId: FIREBASE_PROJECT_ID,
+  storageBucket: FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: FIREBASE_MESSAGING_SENDER_ID,
+  appId: FIREBASE_APP_ID,
+  measurementId: FIREBASE_MEASUREMENT_ID
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Auth with persistence
 const auth = initializeAuth(app, {
   persistence: getReactNativePersistence(AsyncStorage)
 });
 
-// Initialize Firestore
 const db = getFirestore(app);
 
-// Function to check if user is logged in
 const checkAuthState = () => {
   return new Promise((resolve) => {
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        // User is signed in
         AsyncStorage.setItem('userSession', JSON.stringify({
           uid: user.uid,
           email: user.email,
           lastLogin: new Date().toISOString()
         }));
       } else {
-        // User is signed out
         AsyncStorage.removeItem('userSession');
       }
       resolve(user);

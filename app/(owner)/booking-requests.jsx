@@ -11,8 +11,9 @@ import {
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { auth } from '../../firebase';
-import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
-import { getOwnerBookings, checkExpiredBookings, approveBooking, rejectBooking, checkIsRegisteredOwner } from '../../constants/parkingData';
+import { FontAwesome } from 'react-native-vector-icons';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import { getOwnerBookings, checkExpiredBookings, approveBooking, cancelBooking, checkIsRegisteredOwner } from '../../constants/parkingData';
 
 export default function BookingRequests() {
   const router = useRouter();
@@ -110,6 +111,7 @@ export default function BookingRequests() {
         return '#4CAF50'; // Green
       case 'cancelled':
       case 'rejected':
+      case 'Cancelled By Owner':
         return '#F44336'; // Red
       case 'completed':
         return '#2196F3'; // Blue
@@ -150,8 +152,8 @@ export default function BookingRequests() {
 
   const handleRejectBooking = (bookingId) => {
     Alert.alert(
-      "Reject Booking",
-      "Are you sure you want to reject this booking?",
+      "Cancel Booking",
+      "Are you sure you want to Cancel this booking?",
       [
         { text: "Cancel", style: "cancel" },
         { 
@@ -160,7 +162,7 @@ export default function BookingRequests() {
           onPress: async () => {
             try {
               setIsLoading(true);
-              await rejectBooking(bookingId);
+              await cancelBooking(bookingId,"Cancelled By Owner");
               
 
               await loadBookings();
@@ -193,7 +195,7 @@ export default function BookingRequests() {
     
 
     const isPast = new Date(item.endTime) < new Date();
-    const isPending = item.status === 'pending';
+    const isPending = item.status === 'active';
     const displayStatus = item.status.toUpperCase();
     
     return (
@@ -206,21 +208,21 @@ export default function BookingRequests() {
         </View>
         
         <View style={styles.infoRow}>
-          <Ionicons name="person-outline" size={18} color="#666" />
+          <FontAwesome name="user" size={18} color="#666" />
           <Text style={styles.infoText}>
             Booked by: {item.userName || "User"}
           </Text>
         </View>
         
         <View style={styles.infoRow}>
-          <Ionicons name="time-outline" size={18} color="#666" />
+          <FontAwesome name="clock-o" size={18} color="#666" />
           <Text style={styles.infoText}>
             From: {startTime}
           </Text>
         </View>
         
         <View style={styles.infoRow}>
-          <Ionicons name="time-outline" size={18} color="#666" />
+          <FontAwesome name="clock-o" size={18} color="#666" />
           <Text style={styles.infoText}>
             To: {endTime}
           </Text>
@@ -234,7 +236,7 @@ export default function BookingRequests() {
         </View>
         
         <View style={styles.infoRow}>
-          <MaterialIcons name="schedule" size={18} color="#666" />
+          <FontAwesome name="clock-o" size={18} color="#666" />
           <Text style={styles.infoText}>
             Duration: {item.duration || '0'} hour(s)
           </Text>
@@ -242,18 +244,13 @@ export default function BookingRequests() {
         
         {isPending && !isPast && (
           <View style={styles.actionsRow}>
-            <TouchableOpacity 
-              style={styles.approveButton}
-              onPress={() => handleApproveBooking(item.id)}
-            >
-              <Text style={styles.approveButtonText}>Approve</Text>
-            </TouchableOpacity>
+      
             
             <TouchableOpacity 
               style={styles.rejectButton}
               onPress={() => handleRejectBooking(item.id)}
             >
-              <Text style={styles.rejectButtonText}>Reject</Text>
+              <Text style={styles.rejectButtonText}>Cancel</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -300,7 +297,7 @@ export default function BookingRequests() {
         </View>
       ) : filteredBookings().length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Ionicons name="calendar-outline" size={100} color="#CCCCCC" />
+          <FontAwesome name="calendar-o" size={100} color="#CCCCCC" />
           <Text style={styles.emptyTitle}>No Bookings Found</Text>
           <Text style={styles.emptyText}>
             {filter === 'all' 

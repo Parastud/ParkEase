@@ -3,7 +3,7 @@ import Login from './Login'
 import Register from './Register'
 import { TouchableOpacity, View, Text, ImageBackground, StatusBar } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { Ionicons } from '@expo/vector-icons'
+import { FontAwesome } from '@expo/vector-icons'
 import Animated, { FadeIn } from 'react-native-reanimated'
 
 const AuthLayout = () => {
@@ -17,12 +17,13 @@ const AuthLayout = () => {
     <View className="flex-1">
       <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
       <ImageBackground
-        source={require('../../assets/test.jpg')}
+        source={require('../../assets/car.jpg')}
         className="absolute w-full h-full -top-1/2"
         resizeMode="cover"
-
       >
         <View className="absolute w-full h-full bg-black/50" />
+        <View className="absolute left-0 right-0 bottom-8 flex-row justify-center">
+        </View>
       </ImageBackground>
       
       <SafeAreaView className="flex-1">
@@ -32,7 +33,7 @@ const AuthLayout = () => {
         >
           <View className="items-center px-6 pt-12">
             <View className="w-20 h-20 bg-white/20 rounded-2xl items-center justify-center mb-4">
-              <Ionicons name="car" size={40} color="#fff" />
+              <FontAwesome name="car" size={40} color="#fff" />
             </View>
             <Text className="text-white text-4xl font-bold">ParkEase</Text>
             <Text className="text-white/80 text-base mt-2">Find parking spots with ease</Text>
